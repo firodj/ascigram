@@ -3,6 +3,7 @@ CFLAGS = /O2 /sdl /Isrc /D_CRT_SECURE_NO_WARNINGS
 
 ASCIGRAM_SRC = \
 	src\buffer.obj \
+	src\stack.obj \
 	src\version.obj
 
 all: ascigram.exe
