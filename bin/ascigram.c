@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
+#include "document.h"
+#include "svg.h"
 #include "option.h"
-#include "buffer.h"
 
 #define DEF_IUNIT 1024
 #define DEF_OUNIT 64
@@ -105,8 +106,12 @@ int
 main(int argc, char** argv)
 {
 	struct option_data data;
+	clock_t t1, t2;	
 	FILE *file = stdin;
 	ascigram_buffer *ib, *ob;
+	ascigram_renderer *renderer = NULL;
+	void (*renderer_free)(ascigram_renderer *) = NULL;
+	ascigram_document *document;
 
 	/* Parse options */
 	data.basename = argv[0];
@@ -140,8 +145,48 @@ main(int argc, char** argv)
 	/* Close input file */
 	if (file != stdin) fclose(file);
 
+	/* Create the renderer */
+	renderer = ascigram_svg_renderer_new();
+	renderer_free = ascigram_svg_renderer_free;
+
+	/* Perform ASCII-Art Diagram rendering */
+	ob = ascigram_buffer_new(data.ounit);
+	document = ascigram_document_new(renderer);
+
+	t1 = clock();
+	ascigram_document_render(document, ob, ib->data, ib->size);
+	t2 = clock();
+
 	/* Cleanup */
 	ascigram_buffer_free(ib);
+	ascigram_document_free(document);
+	renderer_free(renderer);
+
+	/* Write the result to stdout */
+	(void)fwrite(ob->data, 1, ob->size, stdout);
+	ascigram_buffer_free(ob);
+
+	if (ferror(stdout)) {
+		fprintf(stderr, "I/O errors found while writing output.\n");
+		return 5;
+	}
+
+	/* Show rendering time */
+	if (data.show_time) {
+		double elapsed;
+
+		if (t1 == ((clock_t) -1) || t2 == ((clock_t) -1)) {
+			fprintf(stderr, "Failed to get the time.\n");
+			return 1;
+		}
+
+		elapsed = (double)(t2 - t1) / CLOCKS_PER_SEC;
+		if (elapsed < 1)
+			fprintf(stderr, "Time spent on rendering: %7.2f ms.\n", elapsed*1e3);
+		else
+			fprintf(stderr, "Time spent on rendering: %6.3f s.\n", elapsed);
+	}
+
 
 	return 0;
 }

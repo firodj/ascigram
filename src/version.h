@@ -1,5 +1,4 @@
 /* version.h */
-
 #ifndef _ASCIGRAM_VERSION_H_
 #define _ASCIGRAM_VERSION_H_
 

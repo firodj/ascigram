@@ -1,7 +1,6 @@
 /* stack.h - simple stacking */
-
-#ifndef ASCIGRAM_STACK_H
-#define ASCIGRAM_STACK_H
+#ifndef _ASCIGRAM_STACK_H_
+#define _ASCIGRAM_STACK_H_
 
 #include <stddef.h>
 
@@ -49,4 +48,4 @@ void *ascigram_stack_top(const ascigram_stack *st);
 }
 #endif
 
-#endif /** ASCIGRAM_STACK_H **/
+#endif /** _ASCIGRAM_STACK_H_ **/

@@ -1,7 +1,6 @@
 /* buffer.h */
-#ifndef _ASCIGRAM_BUFFER_H
-#define _ASCIGRAM_BUFFER_H
-
+#ifndef _ASCIGRAM_BUFFER_H_
+#define _ASCIGRAM_BUFFER_H_
 
 #include <stdio.h>
 #include <stddef.h>
@@ -134,4 +133,4 @@ void ascigram_buffer_free(ascigram_buffer *buf);
 }
 #endif
 
-#endif /** _ASCIGRAM_BUFFER_H **/
+#endif /** _ASCIGRAM_BUFFER_H_ **/
