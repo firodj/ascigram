@@ -77,3 +77,15 @@ ascigram_stack_top(const ascigram_stack *st)
 
 	return st->item[st->size - 1];
 }
+
+void *
+ascigram_stack_get(const ascigram_stack *st, int index)
+{
+	assert(st);
+
+	if (index >= st->size)
+		return NULL;
+
+	return st->item[index];
+}
+

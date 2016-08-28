@@ -43,6 +43,8 @@ void *ascigram_stack_pop(ascigram_stack *st);
 /* ascigram_stack_top: retrieve the item at the top of the stack */
 void *ascigram_stack_top(const ascigram_stack *st);
 
+/* ascigram_stack_get: get item at index */
+void *ascigram_stack_get(const ascigram_stack *st, int index);
 
 #ifdef __cplusplus
 }

@@ -35,6 +35,7 @@ print_help(const char *basename)
 	/* main options */
 	printf("Main options:\n");
 	print_option('h', "help", "Show this help usage.");
+	print_option('T', "time", "Show time spent in rendering.");
 
 }
 
@@ -67,6 +68,11 @@ parse_short_option(char opt, char *next, void *opaque)
 		return 0;
 	}
 
+	if (opt == 'T') {
+		data->show_time = 1;
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -81,6 +87,11 @@ parse_long_option(char *opt, char *next, void *opaque)
 		print_help(data->basename);
 		data->done = 1;
 		return 0;
+	}
+
+	if (strcmp(opt, "time")==0) {
+		data->show_time = 1;
+		return 1;
 	}
 
 	return 0;
