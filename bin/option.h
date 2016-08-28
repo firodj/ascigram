@@ -1,5 +1,9 @@
-#ifndef _OPTION_H_
-#define _OPTION_H_
+/* option.h */
+#ifndef _ASCIGRAM_OPTION_H_
+#define _ASCIGRAM_OPTION_H_
+
+#define str(x) __str(x)
+#define __str(x) #x
 
 int parse_options(
     int argc, char **argv,
@@ -10,4 +14,4 @@ int parse_options(
 
 int parseint(const char *string, long *result);
 
-#endif
+#endif /** _ASCIGRAM_OPTION_H_ **/
