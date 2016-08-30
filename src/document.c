@@ -38,9 +38,9 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 		while (end < size && data[end] != '\n') {
 			ascigram_cell cell, *pcell;
 			cell.ch = data[end];
-			cell.meta = 0;
-			cell.y = prow->y;
-			cell.x = x;
+			cell.attr.meta = 0;
+			cell.attr.y = prow->y;
+			cell.attr.x = x;
 			prow->width = x;
 			ascigram_stack_init(&cell.pattern_refs, sizeof(ascigram_pattern_p));
 
@@ -96,9 +96,38 @@ ascigram_document_new(
 void
 ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint8_t *data, size_t size)
 {
+	ascigram_pattern *pfact;
+	ascigram_stack pattern_refs;
+	int ifact;
+
+	ascigram_stack_init(&pattern_refs, sizeof(ascigram_pattern_p));
+
 	scan_rows(doc, data, size);
 
-	size_t beg, end;
+	ifact = 0;
+	while(pfact = ascigram_patterns_iter(&ifact)) {
+		ascigram_pattern **pat_ref;
+		ascigram_pattern *pat_new = ascigram_pattern_new(pfact);
+		ascigram_stack_push(&pattern_refs, &pat_new);
+		ascigram_row *prow;
+		int y = 0;
+
+		while (prow = ascigram_stack_iter(&doc->rows, &y)) {
+			ascigram_cell *pcell;
+			int x = 0;
+
+			while (pcell = ascigram_stack_iter(&prow->cells, &x)) {
+				
+			}
+		}
+
+		while (pat_ref = ascigram_stack_pop(&pattern_refs)) {
+			ascigram_pattern_free(*pat_ref);
+		}
+
+	}
+
+	ascigram_stack_uninit(&pattern_refs);
 }
 
 void

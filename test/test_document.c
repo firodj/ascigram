@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "document.h"
+#include "pattern.h"
 #include "test.h"
 #include "svg.h"
 #include <string.h>
@@ -11,6 +12,8 @@ test_document_blank(void)
 	int x, y;
 	ascigram_row *prow;
 	ascigram_cell *pcell;
+
+	ascigram_patterns_initialize();
 
 	const char *input = "    \n" 
 		"    \n"
@@ -27,9 +30,9 @@ test_document_blank(void)
 	while (prow = ascigram_stack_iter(&doc->rows, &y)) {
 		x = 0;
 		while (pcell = ascigram_stack_iter(&prow->cells, &x)) {
-			EXPECT(y-1 == pcell->y || x-1 == pcell->x, 
+			EXPECT(y-1 == pcell->attr.y || x-1 == pcell->attr.x, 
 					"(%d %d) <> %d %d '%02X' |", y-1, x-1, 
-					pcell->y, pcell->x, pcell->ch);
+					pcell->attr.y, pcell->attr.x, pcell->ch);
 		}
 	}
 

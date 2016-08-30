@@ -21,6 +21,11 @@ ascigram_patterns_register(ascigram_pattern_p pattern)
 }
 
 ascigram_pattern_p
+ascigram_patterns_iter(int *index) {
+	return ascigram_stack_iter(&ascigram_patterns, index);
+}
+
+ascigram_pattern_p
 ascigram_pattern_new(ascigram_pattern_p fact)
 {
 	ascigram_pattern_p pattern = NULL;
@@ -30,7 +35,7 @@ ascigram_pattern_new(ascigram_pattern_p fact)
 	pattern = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
 	memcpy(pattern, fact, sizeof(ascigram_pattern));
 	
-	ascigram_stack_init(&pattern->cell_refs, sizeof(ascigram_cell_p));
+	ascigram_stack_init(&pattern->attrs, sizeof(ascigram_attr));
 
 	if (pattern->init)
 		pattern->init(pattern);
@@ -44,7 +49,7 @@ ascigram_pattern_free(ascigram_pattern *pattern)
 	if (pattern->uninit)
 		pattern->uninit(pattern);
 
-	ascigram_stack_uninit(&pattern->cell_refs);
+	ascigram_stack_uninit(&pattern->attrs);
 
 	free(pattern);
 }

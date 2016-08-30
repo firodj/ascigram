@@ -18,10 +18,15 @@ extern "C" {
  * TYPES *
  *********/
 
-struct ascigram_cell {
-	wchar_t ch;
+struct ascigram_attr {
 	uint16_t x, y;
     uint32_t meta;
+};
+typedef struct ascigram_attr ascigram_attr;
+
+struct ascigram_cell {
+	wchar_t ch;
+	ascigram_attr attr;
 	ascigram_stack pattern_refs;
 };
 typedef struct ascigram_cell ascigram_cell;
