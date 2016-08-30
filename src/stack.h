@@ -15,6 +15,7 @@ extern "C" {
 
 struct ascigram_stack {
 	void **item;
+	size_t element_size;
 	size_t size;
 	size_t asize;
 };
@@ -26,7 +27,7 @@ typedef struct ascigram_stack ascigram_stack;
  *************/
 
 /* ascigram_stack_init: initialize a stack */
-void ascigram_stack_init(ascigram_stack *st, size_t initial_size);
+void ascigram_stack_init(ascigram_stack *st, size_t element_size);
 
 /* ascigram_stack_uninit: free internal data of the stack */
 void ascigram_stack_uninit(ascigram_stack *st);

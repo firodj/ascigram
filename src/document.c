@@ -13,6 +13,16 @@
 #define strncasecmp	_strnicmp
 #endif
 
+struct ascigram_symbol {
+	wchar_t ch;
+	uint16_t x, y;
+    uint32_t meta;
+	ascigram_stack occupants;
+}
+
+struct ascigram_board {
+	ascigram_stack rows;
+}
 
 struct ascigram_document {
 	ascigram_renderer renderer;
