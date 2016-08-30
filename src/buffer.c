@@ -10,6 +10,9 @@ void *
 ascigram_malloc(size_t size)
 {
 	void *ret = malloc(size);
+#ifdef _DEBUG
+	fprintf(stderr, "malloc: 0x%x %d\n", ret, size);
+#endif
 
 	if (!ret) {
 		fprintf(stderr, "Allocation failed.\n");
@@ -23,6 +26,9 @@ void *
 ascigram_calloc(size_t nmemb, size_t size)
 {
 	void *ret = calloc(nmemb, size);
+#ifdef _DEBUG
+	fprintf(stderr, "calloc: 0x%x %d x %d\n", ret, nmemb, size);
+#endif
 
 	if (!ret) {
 		fprintf(stderr, "Allocation failed.\n");
@@ -36,6 +42,9 @@ void *
 ascigram_realloc(void *ptr, size_t size)
 {
 	void *ret = realloc(ptr, size);
+#ifdef _DEBUG
+	fprintf(stderr, "realloc: 0x%x %d\n", ret, size);
+#endif
 
 	if (!ret) {
 		fprintf(stderr, "Allocation failed.\n");
@@ -43,6 +52,32 @@ ascigram_realloc(void *ptr, size_t size)
 	}
 
 	return ret;
+}
+
+void *
+ascigram_memcpy(void *dest, const void *src, size_t size) {
+	void *ret = memcpy(dest, src, size);
+#ifdef _DEBUG
+	fprintf(stderr, "memcpy: 0x%x <- 0x%x %d\n", dest, src, size);
+#endif
+
+	if (!ret) {
+		fprintf(stderr, "Memcopy failed.\n");
+		abort();
+	}
+}
+
+void *
+ascigram_memset(void *dest, unsigned char ch, size_t size)
+{
+	void *ret = memset(dest, ch, size);
+#ifdef _DEBUG
+	fprintf(stderr, "memset: 0x%x '%02X' %d", dest, ch, size);
+#endif
+
+	if (!ret) {
+		fprintf(stderr, "Memset failed.\n");
+	}
 }
 
 void

@@ -48,6 +48,7 @@ typedef struct ascigram_buffer ascigram_buffer;
 void *ascigram_malloc(size_t size) __attribute__ ((malloc));
 void *ascigram_calloc(size_t nmemb, size_t size) __attribute__ ((malloc));
 void *ascigram_realloc(void *ptr, size_t size) __attribute__ ((malloc));
+void *ascigram_memcpy(void *dest, const void *src, size_t size) __attribute__ ((memcpy));
 
 /* ascigram_buffer_init: initialize a buffer with custom allocators */
 void ascigram_buffer_init(

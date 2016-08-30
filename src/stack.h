@@ -36,7 +36,7 @@ void ascigram_stack_uninit(ascigram_stack *st);
 void ascigram_stack_grow(ascigram_stack *st, size_t neosz);
 
 /* ascigram_stack_push: push an item to the top of the stack */
-void ascigram_stack_push(ascigram_stack *st, void *item);
+void* ascigram_stack_push(ascigram_stack *st, void *item);
 
 /* ascigram_stack_pop: retrieve and remove the item at the top of the stack */
 void *ascigram_stack_pop(ascigram_stack *st);
@@ -46,6 +46,11 @@ void *ascigram_stack_top(const ascigram_stack *st);
 
 /* ascigram_stack_get: get item at index */
 void *ascigram_stack_get(const ascigram_stack *st, int index);
+
+void *ascigram_stack_pick(ascigram_stack *st, int index);
+
+void *
+ascigram_stack_iter(const ascigram_stack *st, int *index);
 
 #ifdef __cplusplus
 }

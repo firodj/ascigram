@@ -18,11 +18,11 @@ struct ascigram_symbol {
 	uint16_t x, y;
     uint32_t meta;
 	ascigram_stack occupants;
-}
+};
 
 struct ascigram_board {
 	ascigram_stack rows;
-}
+};
 
 struct ascigram_document {
 	ascigram_renderer renderer;
