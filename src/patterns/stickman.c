@@ -2,7 +2,7 @@
 #include "..\pattern.h"
 
 int
-stickman_pattern_match(ascigram_pattern *pattern, char c, int x, int y, int m);
+stickman_pattern_match(ascigram_pattern_p pattern, ascigram_cell_p cell);
 
 static
 ascigram_pattern stickman_pattern = {
@@ -15,7 +15,7 @@ ascigram_pattern stickman_pattern = {
 	};
 	
 int
-stickman_pattern_match(ascigram_pattern_p pattern, char c, int x, int y, int m)
+stickman_pattern_match(ascigram_pattern_p pattern, ascigram_cell_p cell)
 {
 	switch(pattern->state) {
 	case 0: do {

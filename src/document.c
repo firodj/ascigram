@@ -107,17 +107,27 @@ ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint
 	ifact = 0;
 	while(pfact = ascigram_patterns_iter(&ifact)) {
 		ascigram_pattern **pat_ref;
-		ascigram_pattern *pat_new = ascigram_pattern_new(pfact);
-		ascigram_stack_push(&pattern_refs, &pat_new);
 		ascigram_row *prow;
 		int y = 0;
+
+		assert(pattern_refs.size == 0);
 
 		while (prow = ascigram_stack_iter(&doc->rows, &y)) {
 			ascigram_cell *pcell;
 			int x = 0;
 
 			while (pcell = ascigram_stack_iter(&prow->cells, &x)) {
-				
+				int ipat;
+				ascigram_pattern *pat_new = ascigram_pattern_new(pfact);
+				ascigram_stack_push(&pattern_refs, &pat_new);
+
+				ipat = 0;
+				while (pat_ref = ascigram_stack_iter(&pattern_refs, &ipat)) {
+					int meta = (*pat_ref)->match(*pat_ref, pcell);
+					
+
+				}
+								
 			}
 		}
 

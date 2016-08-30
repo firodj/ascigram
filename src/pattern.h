@@ -4,10 +4,12 @@
 
 #include "stack.h"
 
+struct ascigram_cell;
 struct ascigram_pattern;
+typedef struct ascigram_cell * ascigram_cell_p;
 typedef struct ascigram_pattern * ascigram_pattern_p;
 
-typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, char, int, int, int);
+typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, ascigram_cell_p);
 typedef void (*ascigram_pattern_init_t)(ascigram_pattern_p);
 typedef void (*ascigram_pattern_uninit_t)(ascigram_pattern_p);
 
