@@ -3,6 +3,7 @@
 #define _ASCIGRAM_DOCUMENT_H_
 
 #include "buffer.h"
+#include "stack.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,8 +18,21 @@ extern "C" {
  * TYPES *
  *********/
 
-struct ascigram_document;
-typedef struct ascigram_document ascigram_document;
+struct ascigram_cell {
+	wchar_t ch;
+	uint16_t x, y;
+    uint32_t meta;
+	ascigram_stack pattern_refs;
+};
+typedef struct ascigram_cell ascigram_cell;
+typedef struct ascigram_cell * ascigram_cell_p;
+
+struct ascigram_row {
+	uint16_t y;
+	uint16_t width;
+	ascigram_stack cells;
+};
+typedef struct ascigram_row ascigram_row;
 
 struct ascigram_renderer_data {
 	void *opaque;
@@ -35,6 +49,14 @@ struct ascigram_renderer {
 typedef struct ascigram_renderer ascigram_renderer;
 
 
+struct ascigram_document {
+	ascigram_renderer renderer;
+	ascigram_renderer_data data;
+
+	ascigram_stack rows;
+};
+typedef struct ascigram_document ascigram_document;
+
 /*************
  * FUNCTIONS *
  *************/
@@ -49,7 +71,6 @@ void ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const
 
 /* ascigram_document_free: deallocate a document processor instance */
 void ascigram_document_free(ascigram_document *doc);
-
 
 #ifdef __cplusplus
 }

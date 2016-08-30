@@ -1,16 +1,19 @@
 CC = cl
-CFLAGS = /O2 /sdl /Isrc /Itest /Ibin /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
+CFLAGS = /O2 /sdl /Isrc /Itest /Ibin -Isrc/patterns /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
 
 ASCIGRAM_SRC = \
 	src\buffer.obj \
 	src\document.obj \
 	src\stack.obj \
 	src\svg.obj \
-	src\version.obj
+	src\version.obj \
+	src\pattern.obj \
+	src\patterns\stickman.obj
 
 TEST_SRC = \
     test\test.obj \
-    test\test_stack.obj
+    test\test_stack.obj \
+	test\test_document.obj
 
 all: ascigram.exe
 

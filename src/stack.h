@@ -14,7 +14,7 @@ extern "C" {
  *********/
 
 struct ascigram_stack {
-	void **item;
+	void *item;
 	size_t element_size;
 	size_t size;
 	size_t asize;

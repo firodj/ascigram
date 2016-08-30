@@ -1,10 +1,11 @@
-#include "document.h"
 
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 
+#include "document.h"
+#include "pattern.h"
 #include "stack.h"
 
 #ifndef _MSC_VER
@@ -13,23 +14,6 @@
 #define strncasecmp	_strnicmp
 #endif
 
-struct ascigram_symbol {
-	wchar_t ch;
-	uint16_t x, y;
-    uint32_t meta;
-	ascigram_stack occupants;
-};
-
-struct ascigram_board {
-	ascigram_stack rows;
-};
-
-struct ascigram_document {
-	ascigram_renderer renderer;
-	ascigram_renderer_data data;
-
-	ascigram_stack rows;
-};
 
 /************
  * INTERNAL *
@@ -39,15 +23,54 @@ void
 scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 {
 	size_t end = 0;
-	
+	int y = 0, x;
+
 	while (end < size) {
-		ascigram_stack_push(&doc->rows, (void*)end);
+		ascigram_row row, *prow;
+
+		row.y = y;
+		row.width = 0;
+		ascigram_stack_init(&row.cells, sizeof(ascigram_cell));
+
+		prow = ascigram_stack_push(&doc->rows, &row);
 		
-		fprintf(stderr, "TEST:: rows: %d\n", end);
-		
-		while (end < size && data[end] != '\n') end++;
+		x = 0;
+		while (end < size && data[end] != '\n') {
+			ascigram_cell cell, *pcell;
+			cell.ch = data[end];
+			cell.meta = 0;
+			cell.y = prow->y;
+			cell.x = x;
+			prow->width = x;
+			ascigram_stack_init(&cell.pattern_refs, sizeof(ascigram_pattern_p));
+
+			pcell = ascigram_stack_push(&prow->cells, &cell);
+
+			end++;
+			x++;
+		}
+
 		if (data[end] == '\n') end++;
+		y++;
 	}
+}
+
+void
+free_rows(ascigram_document *doc)
+{
+	int irow, icell;
+	ascigram_row *prow;
+	ascigram_cell *pcell;
+
+	irow = 0;
+	while(prow = ascigram_stack_iter(&doc->rows, &irow)) {
+		icell = 0;
+		while(pcell = ascigram_stack_iter(&prow->cells, &icell)) {
+			ascigram_stack_uninit(&pcell->pattern_refs);
+		}
+		ascigram_stack_uninit(&prow->cells);
+	}
+	doc->rows.size = 0;
 }
 
 /**********************
@@ -65,7 +88,7 @@ ascigram_document_new(
 	doc = ascigram_malloc(sizeof(ascigram_document));
 	memcpy(&doc->renderer, renderer, sizeof(ascigram_renderer));
 
-	ascigram_stack_init(&doc->rows, 0);
+	ascigram_stack_init(&doc->rows, sizeof(ascigram_row));
 
 	return doc;
 }
@@ -81,6 +104,7 @@ ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint
 void
 ascigram_document_free(ascigram_document *doc)
 {
+	free_rows(doc);	
 	ascigram_stack_uninit(&doc->rows);
 	free(doc);
 }

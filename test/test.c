@@ -1,14 +1,15 @@
 #include <stdio.h>
-
 #include "test.h"
 
 int test_stack_init(void);
 int test_stack_push(void);
+int test_document_blank(void);
 
 static 
 test_case_item_t test_case_items[] = {
 	{"Stack Init", test_stack_init},
-	{"Stack Push", test_stack_push}
+	{"Stack Push", test_stack_push},
+	{"Document Blank", test_document_blank}
 };
 
 int
