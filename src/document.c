@@ -104,7 +104,7 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 
 	iattr = 0;
 	while (attr = ascigram_stack_iter(&pat->attrs, &attr)) {
-		if (attr-> & M_OCCUPIED) {
+		if (attr->meta & M_OCCUPIED) {
 			int iref = 0;
 			ascigram_pattern **pat_ref;
 			ascigram_cell *cell = get_cell(doc, attr->x, attr->y);
@@ -130,6 +130,34 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 	}
 	
     pat->attrs.size = 0;
+}
+
+void
+add_meta(ascigram_document *doc, ascigram_pattern_p pat, ascigram_cell *cell, int32_t meta)
+{
+	ascigram_attr *attr;
+	if (meta & M_OCCUPIED) {
+		ascigram_stack_push(&cell->pattern_refs, &pat);
+    }
+    attr = ascigram_stack_push(pat->attrs, &cell->attr);
+    attr->meta = meta;
+}
+
+void
+apply_pat(ascigram_document *doc, ascigram_pattern_p pat)
+{
+    int iattr;
+	ascigram_attr *attr;
+	
+	if (pat->finish != P_ACCEPT) return;
+
+	iattr = 0;
+	while (attr = ascigram_stack_iter(&pat->attrs, &attr)) {
+		ascigram_cell *cell = get_cell(doc, attr->x, attr->y);
+		if (!cell) continue;
+		
+		cell->meta |= attr->meta;
+	}
 }
 
 void
@@ -203,7 +231,7 @@ ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint
 						apply_pat(doc, *pat_ref);
 						remove_pat(doc, *pat_ref, 1);
 					} else {
-						add_meta(doc, *pat_ref, x, y, meta);
+						add_meta(doc, *pat_ref, pcell, meta);
 					}
 				}
 								

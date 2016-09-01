@@ -20,7 +20,7 @@ extern "C" {
 
 struct ascigram_attr {
 	uint16_t x, y;
-    uint32_t meta;
+    int32_t meta;
 };
 typedef struct ascigram_attr ascigram_attr;
 
@@ -52,7 +52,6 @@ struct ascigram_renderer {
 	/* block level callbacks - NULL skips the block */
 };
 typedef struct ascigram_renderer ascigram_renderer;
-
 
 struct ascigram_document {
 	ascigram_renderer renderer;

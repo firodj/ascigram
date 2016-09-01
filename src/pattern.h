@@ -38,21 +38,27 @@ typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, ascigram_cell_p);
 typedef void (*ascigram_pattern_init_t)(ascigram_pattern_p);
 typedef void (*ascigram_pattern_uninit_t)(ascigram_pattern_p);
 
-struct ascigram_pattern {
+struct ascigram_factory {
 	const char *name;
-	int state;
-	int finish;
 	ascigram_pattern_match_t match;
 	ascigram_pattern_init_t init;
 	ascigram_pattern_uninit_t uninit;
+}
+typedef struct ascigram_factory ascigram_factory;
+
+struct ascigram_pattern {
+	ascigram_factory *factory;
+	int state;
+	int finish;
 	ascigram_stack attrs;
+	ascigram_cell curr;
 };
 typedef struct ascigram_pattern ascigram_pattern;
 
 void ascigram_patterns_initialize();
-void ascigram_patterns_register(ascigram_pattern_p pattern);
+void ascigram_patterns_register(ascigram_factory *fact);
 ascigram_pattern_p ascigram_patterns_iter(int *index);
-ascigram_pattern_p ascigram_pattern_new(ascigram_pattern_p fact);
+ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pattern);
 int ascigram_pattern_expect(ascigram_pattern_p pattern, const char *);
 

@@ -4,41 +4,42 @@
 #include "document.h"
 
 static
-ascigram_stack ascigram_patterns;
+ascigram_stack ascigram_factories;
 
 void
 ascigram_patterns_initialize()
 {
-	ascigram_stack_init(&ascigram_patterns, sizeof(ascigram_pattern));
+	ascigram_stack_init(&ascigram_factories, sizeof(ascigram_factory));
 	
 	stickman_pattern_register();
 }
 
 void
-ascigram_patterns_register(ascigram_pattern_p pattern)
+ascigram_patterns_register(ascigram_factory *fact)
 {
-	ascigram_stack_push(&ascigram_patterns, pattern);
+	ascigram_stack_push(&ascigram_factories, fact);
 }
 
-ascigram_pattern_p
+ascigram_factory*
 ascigram_patterns_iter(int *index) {
-	return ascigram_stack_iter(&ascigram_patterns, index);
+	return ascigram_stack_iter(&ascigram_factories, index);
 }
 
 ascigram_pattern_p
-ascigram_pattern_new(ascigram_pattern_p fact)
+ascigram_pattern_new(ascigram_factory *fact)
 {
 	ascigram_pattern_p pattern = NULL;
 
-	assert(template);
+	assert(fact);
 
 	pattern = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
-	ascigram_memcpy(pattern, fact, sizeof(ascigram_pattern));
+	ascigram_memset(pattern, 0, sizeof(ascigram_pattern));
+	pattern->factory = fact;
 	
 	ascigram_stack_init(&pattern->attrs, sizeof(ascigram_attr));
 
-	if (pattern->init)
-		pattern->init(pattern);
+	if (pattern->factory->init)
+		pattern->factory->init(pattern);
 	
 	return pattern;
 }
@@ -46,8 +47,8 @@ ascigram_pattern_new(ascigram_pattern_p fact)
 void
 ascigram_pattern_free(ascigram_pattern *pattern)
 {
-	if (pattern->uninit)
-		pattern->uninit(pattern);
+	if (pattern->factory->uninit)
+		pattern->factpry->uninit(pattern);
 
 	ascigram_stack_uninit(&pattern->attrs);
 
@@ -59,8 +60,8 @@ ascigram_pattern_test(ascigram_pattern_p pattern, ascigram_cell_p cell)
 {
 	int meta;
 	
-	if (pattern->match) {
-		meta = pattern->match(pattern, cell);
+	if (pattern->factory->match) {
+		meta = pattern->factory->match(pattern, cell);
 		if (meta < 0) {
 			pattern->finish = meta;
 		}
