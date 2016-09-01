@@ -8,6 +8,7 @@ static
 ascigram_pattern stickman_pattern = {
 	"stickman",
 	0,
+	0,
 	stickman_pattern_match,
 	NULL,
 	NULL,

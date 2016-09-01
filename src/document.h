@@ -59,6 +59,7 @@ struct ascigram_document {
 	ascigram_renderer_data data;
 
 	ascigram_stack rows;
+	ascigram_stack pattern_refs;
 };
 typedef struct ascigram_document ascigram_document;
 

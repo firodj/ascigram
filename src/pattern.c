@@ -33,7 +33,7 @@ ascigram_pattern_new(ascigram_pattern_p fact)
 	assert(template);
 
 	pattern = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
-	memcpy(pattern, fact, sizeof(ascigram_pattern));
+	ascigram_memcpy(pattern, fact, sizeof(ascigram_pattern));
 	
 	ascigram_stack_init(&pattern->attrs, sizeof(ascigram_attr));
 
@@ -52,6 +52,22 @@ ascigram_pattern_free(ascigram_pattern *pattern)
 	ascigram_stack_uninit(&pattern->attrs);
 
 	free(pattern);
+}
+
+int
+ascigram_pattern_test(ascigram_pattern_p pattern, ascigram_cell_p cell)
+{
+	int meta;
+	
+	if (pattern->match) {
+		meta = pattern->match(pattern, cell);
+		if (meta < 0) {
+			pattern->finish = meta;
+		}
+		return meta;
+	}
+	
+	return P_REJECT;
 }
 
 int

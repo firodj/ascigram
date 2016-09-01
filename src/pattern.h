@@ -4,6 +4,31 @@
 
 #include "stack.h"
 
+#define M_NONE 0
+#define M_OCCUPIED 0x000001
+#define M_BOX_START_S 0x000002
+#define M_BOX_AFTER_S 0x000004
+#define M_BOX_START_E 0x000008
+#define M_BOX_AFTER_E 0x000010
+#define M_LINE_START_E 0x000020
+#define M_DASH_START_E 0x000040
+#define M_LINE_AFTER_E 0x000080
+#define M_DASH_AFTER_E 0x000100
+#define M_LINE_START_S 0x000200
+#define M_DASH_START_S 0x000400
+#define M_LINE_AFTER_S 0x000800
+#define M_DASH_AFTER_S 0x001000
+#define M_LINE_START_SE 0x002000
+#define M_DASH_START_SE 0x004000
+#define M_LINE_AFTER_SE 0x008000
+#define M_DASH_AFTER_SE 0x010000
+#define M_LINE_START_SW 0x020000
+#define M_DASH_START_SW 0x040000
+#define M_LINE_AFTER_SW 0x080000
+#define M_DASH_AFTER_SW 0x100000
+#define P_REJECT -1
+#define P_ACCEPT -2
+
 struct ascigram_cell;
 struct ascigram_pattern;
 typedef struct ascigram_cell * ascigram_cell_p;
@@ -16,6 +41,7 @@ typedef void (*ascigram_pattern_uninit_t)(ascigram_pattern_p);
 struct ascigram_pattern {
 	const char *name;
 	int state;
+	int finish;
 	ascigram_pattern_match_t match;
 	ascigram_pattern_init_t init;
 	ascigram_pattern_uninit_t uninit;
