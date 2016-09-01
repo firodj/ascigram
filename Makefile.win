@@ -13,7 +13,8 @@ ASCIGRAM_SRC = \
 TEST_SRC = \
     test\test.obj \
     test\test_stack.obj \
-	test\test_document.obj
+	test\test_document.obj \
+	test\test_pattern.obj
 
 all: ascigram.exe
 

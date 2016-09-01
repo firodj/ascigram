@@ -26,25 +26,25 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 	int y = 0, x;
 
 	while (end < size) {
-		ascigram_row row, *prow;
+		ascigram_row row, *row_p;
 
 		row.y = y;
 		row.width = 0;
 		ascigram_stack_init(&row.cells, sizeof(ascigram_cell));
 
-		prow = ascigram_stack_push(&doc->rows, &row);
+		row_p = ascigram_stack_push(&doc->rows, &row);
 		
 		x = 0;
 		while (end < size && data[end] != '\n') {
-			ascigram_cell cell, *pcell;
+			ascigram_cell cell, *cell_p;
 			cell.ch = data[end];
 			cell.attr.meta = 0;
-			cell.attr.y = prow->y;
+			cell.attr.y = row_p->y;
 			cell.attr.x = x;
-			prow->width = x;
+			row_p->width = x;
 			ascigram_stack_init(&cell.pattern_refs, sizeof(ascigram_pattern_p));
 
-			pcell = ascigram_stack_push(&prow->cells, &cell);
+			cell_p = ascigram_stack_push(&row_p->cells, &cell);
 
 			end++;
 			x++;
@@ -59,16 +59,16 @@ void
 free_rows(ascigram_document *doc)
 {
 	int irow, icell;
-	ascigram_row *prow;
-	ascigram_cell *pcell;
+	ascigram_row *row_p;
+	ascigram_cell *cell_p;
 
 	irow = 0;
-	while(prow = ascigram_stack_iter(&doc->rows, &irow)) {
+	while(row_p = ascigram_stack_iter(&doc->rows, &irow)) {
 		icell = 0;
-		while(pcell = ascigram_stack_iter(&prow->cells, &icell)) {
-			ascigram_stack_uninit(&pcell->pattern_refs);
+		while(cell_p = ascigram_stack_iter(&row_p->cells, &icell)) {
+			ascigram_stack_uninit(&cell_p->pattern_refs);
 		}
-		ascigram_stack_uninit(&prow->cells);
+		ascigram_stack_uninit(&row_p->cells);
 	}
 	doc->rows.size = 0;
 }
@@ -77,9 +77,9 @@ ascigram_cell *
 get_cell(ascigram_document *doc, uint16_t x, uint16_t y)
 {
 	ascigram_row *row;
-	ascigrem_cell *cell;
+	ascigram_cell *cell;
 	
-	row = ascigram_stack_get(&doc->rows, y)
+	row = ascigram_stack_get(&doc->rows, y);
 	if (!row) return NULL;
 	
 	cell = ascigram_stack_get(&row->cells, x);
@@ -87,7 +87,7 @@ get_cell(ascigram_document *doc, uint16_t x, uint16_t y)
 }
 
 void
-add_pat(ascigram_document *doc, ascigram_pattern_p fact)
+add_pat(ascigram_document *doc, ascigram_factory* fact)
 {
 	ascigram_pattern_p pat_new = ascigram_pattern_new(fact);
     ascigram_stack_push(&doc->pattern_refs, &pat_new);
@@ -96,32 +96,32 @@ add_pat(ascigram_document *doc, ascigram_pattern_p fact)
 void
 remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 {
-	int iattr;
-	ascigram_attr *attr;
+	int attr_i;
+	ascigram_attr *attr_p;
 	
 	if (!pat->finish)
        pat->finish = P_REJECT;
 
-	iattr = 0;
-	while (attr = ascigram_stack_iter(&pat->attrs, &attr)) {
-		if (attr->meta & M_OCCUPIED) {
-			int iref = 0;
+	attr_i = 0;
+	while (attr_p = ascigram_stack_iter(&pat->attrs, &attr_i)) {
+		if (attr_p->meta & M_OCCUPIED) {
+			int ref_i = 0;
 			ascigram_pattern **pat_ref;
-			ascigram_cell *cell = get_cell(doc, attr->x, attr->y);
-			if (!cell) continue;
+			ascigram_cell *cell_p = get_cell(doc, attr_p->x, attr_p->y);
+			if (!cell_p) continue;
 			
-			if (coop) {
-				while (pat_ref = ascigram_stack_iter(&cell->pattern_refs, &iref)) {
-					pat_ref = ascigram_stack_pick(&cell->pattern_refs, --iref);
+			if (cooc) {
+				while (pat_ref = ascigram_stack_iter(&cell_p->pattern_refs, &ref_i)) {
+					pat_ref = ascigram_stack_pick(&cell_p->pattern_refs, --ref_i);
 					if (*pat_ref != pat) {
 						remove_pat(doc, *pat_ref, 0);
 					}
 				}
-				cell->pattern_refs.size = 0;
+				cell_p->pattern_refs.size = 0;
 			} else {
-				while (pat_ref = ascigram_stack_iter(&cell->pattern_refs, &iref)) {
+				while (pat_ref = ascigram_stack_iter(&cell_p->pattern_refs, &ref_i)) {
 					if (*pat_ref == pat) {
-						ascigram_stack_pick(&cell->pattern_refs, --iref);
+						ascigram_stack_pick(&cell_p->pattern_refs, --ref_i);
 						break;
 					}
 				}
@@ -133,30 +133,30 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 }
 
 void
-add_meta(ascigram_document *doc, ascigram_pattern_p pat, ascigram_cell *cell, int32_t meta)
+add_meta(ascigram_document *doc, ascigram_pattern_p pat, ascigram_cell *cell_p, int32_t meta)
 {
-	ascigram_attr *attr;
+	ascigram_attr *attr_p;
 	if (meta & M_OCCUPIED) {
-		ascigram_stack_push(&cell->pattern_refs, &pat);
+		ascigram_stack_push(&cell_p->pattern_refs, &pat);
     }
-    attr = ascigram_stack_push(pat->attrs, &cell->attr);
-    attr->meta = meta;
+    attr_p = ascigram_stack_push(&pat->attrs, &cell_p->attr);
+    attr_p->meta = meta;
 }
 
 void
 apply_pat(ascigram_document *doc, ascigram_pattern_p pat)
 {
-    int iattr;
-	ascigram_attr *attr;
+    int attr_i;
+	ascigram_attr *attr_p;
 	
 	if (pat->finish != P_ACCEPT) return;
 
-	iattr = 0;
-	while (attr = ascigram_stack_iter(&pat->attrs, &attr)) {
-		ascigram_cell *cell = get_cell(doc, attr->x, attr->y);
-		if (!cell) continue;
+	attr_i = 0;
+	while (attr_p = ascigram_stack_iter(&pat->attrs, &attr_i)) {
+		ascigram_cell *cell_p = get_cell(doc, attr_p->x, attr_p->y);
+		if (!cell_p) continue;
 		
-		cell->meta |= attr->meta;
+		cell_p->attr.meta |= attr_p->meta;
 	}
 }
 
@@ -164,15 +164,46 @@ void
 reserve_patrefs(ascigram_document *doc)
 {
 	ascigram_pattern **pat_ref;
-	int ipat = 0;
-	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &ipat)) {
+	int pat_i = 0;
+	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
 		if (!(*pat_ref)->finish != P_ACCEPT) {
 			ascigram_pattern_free(*pat_ref);
-			ascigram_stack_pick(&doc->pattern_refs, --ipat);
+			ascigram_stack_pick(&doc->pattern_refs, --pat_i);
 		}
 	}
 }
 
+ascigram_cell*
+cells_iter(ascigram_document* doc, int* x, int* y)
+{
+	ascigram_cell *cell_p = NULL;
+	ascigram_row *row_p;
+
+	while (row_p = ascigram_stack_iter(&doc->rows, y)) {
+		while (cell_p = ascigram_stack_iter(&row_p->cells, x)) {
+			y--;
+			return cell_p;
+		}
+		*x = 0;
+	}
+
+	return cell_p;
+}
+
+void
+test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
+{
+	int meta = ascigram_pattern_test(pat, cell_p);
+
+	if (meta == P_REJECT) {
+		remove_pat(doc, pat, 0);
+	} else if (meta == P_ACCEPT) {
+		apply_pat(doc, pat);
+		remove_pat(doc, pat, 1);
+	} else {
+		add_meta(doc, pat, cell_p, meta);
+	}
+}
 
 /**********************
  * EXPORTED FUNCTIONS *
@@ -198,56 +229,46 @@ ascigram_document_new(
 void
 ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint8_t *data, size_t size)
 {
-	ascigram_pattern *pfact;
-	
-	int ifact;
+	ascigram_factory *fact;
+	int fact_i, x, y;
  
     assert(doc->pattern_refs.size == 0);
 	
 	scan_rows(doc, data, size);
 
-	ifact = 0;
-	while(pfact = ascigram_patterns_iter(&ifact)) {
+	fact_i = 0;
+	while(fact = ascigram_patterns_iter(&fact_i)) {
 		ascigram_pattern **pat_ref;
-		ascigram_row *prow;
-		int y = 0;
+		ascigram_cell *cell_p;
+		y = 0;
+		x = 0;
 
-		while (prow = ascigram_stack_iter(&doc->rows, &y)) {
-			ascigram_cell *pcell;
-			int x = 0;
+		while (cell_p = cells_iter(doc, &x, &y)) {
+			int pat_i;
+			add_pat(doc, fact);
+			
+			pat_i = 0;
+			while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
+				if ((*pat_ref)->finish) continue;
 
-			while (pcell = ascigram_stack_iter(&prow->cells, &x)) {
-				int ipat;
-				add_pat(doc, pfact);
-				
-				ipat = 0;
-				while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &ipat)) {
-					if ((*pat_ref)->finished) continue;
-					
-					int meta = ascigram_pattern_test(*pat_ref, pcell);
-					if (meta == P_REJECT) {
-						remove_pat(doc, *pat_ref, 0);
-					} else if (meta == P_ACCEPT) {
-						apply_pat(doc, *pat_ref);
-						remove_pat(doc, *pat_ref, 1);
-					} else {
-						add_meta(doc, *pat_ref, pcell, meta);
-					}
-				}
-								
+				test_cell(doc, *pat_ref, cell_p);
 			}
 		}
 
 		reserve_patrefs(doc);
-
 	}
-
-	ascigram_stack_uninit(&pattern_refs);
 }
 
 void
 ascigram_document_free(ascigram_document *doc)
 {
+	ascigram_pattern **pat_ref;
+	int pat_i = 0;
+	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
+		ascigram_pattern_free(*pat_ref);
+	}
+	ascigram_stack_uninit(&doc->pattern_refs);
+
 	free_rows(doc);	
 	ascigram_stack_uninit(&doc->rows);
 	free(doc);

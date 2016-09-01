@@ -3,6 +3,7 @@
 #define _ASCIGRAM_PATTERN_H_
 
 #include "stack.h"
+#include "document.h"
 
 #define M_NONE 0
 #define M_OCCUPIED 0x000001
@@ -29,12 +30,16 @@
 #define P_REJECT -1
 #define P_ACCEPT -2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct ascigram_cell;
 struct ascigram_pattern;
-typedef struct ascigram_cell * ascigram_cell_p;
+typedef struct ascigram_cell ascigram_cell;
 typedef struct ascigram_pattern * ascigram_pattern_p;
 
-typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, ascigram_cell_p);
+typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, ascigram_cell*);
 typedef void (*ascigram_pattern_init_t)(ascigram_pattern_p);
 typedef void (*ascigram_pattern_uninit_t)(ascigram_pattern_p);
 
@@ -43,7 +48,7 @@ struct ascigram_factory {
 	ascigram_pattern_match_t match;
 	ascigram_pattern_init_t init;
 	ascigram_pattern_uninit_t uninit;
-}
+};
 typedef struct ascigram_factory ascigram_factory;
 
 struct ascigram_pattern {
@@ -57,9 +62,13 @@ typedef struct ascigram_pattern ascigram_pattern;
 
 void ascigram_patterns_initialize();
 void ascigram_patterns_register(ascigram_factory *fact);
-ascigram_pattern_p ascigram_patterns_iter(int *index);
+ascigram_factory* ascigram_patterns_iter(int *index);
 ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
-void ascigram_pattern_free(ascigram_pattern_p pattern);
-int ascigram_pattern_expect(ascigram_pattern_p pattern, const char *);
+void ascigram_pattern_free(ascigram_pattern_p pat);
+int ascigram_pattern_expect(ascigram_pattern_p pat, const char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /** _ASCIGRAM_PATTERN_H_ **/

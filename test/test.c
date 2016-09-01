@@ -4,12 +4,14 @@
 int test_stack_init(void);
 int test_stack_push(void);
 int test_document_blank(void);
+int test_pattern_factory(void);
 
 static 
 test_case_item_t test_case_items[] = {
 	{"Stack Init", test_stack_init},
 	{"Stack Push", test_stack_push},
-	{"Document Blank", test_document_blank}
+	{"Document Blank", test_document_blank},
+	{"Pattern Factory", test_pattern_factory},
 };
 
 int

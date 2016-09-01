@@ -28,42 +28,42 @@ ascigram_patterns_iter(int *index) {
 ascigram_pattern_p
 ascigram_pattern_new(ascigram_factory *fact)
 {
-	ascigram_pattern_p pattern = NULL;
+	ascigram_pattern_p pat = NULL;
 
-	assert(fact);
+	assert(fact_p);
 
-	pattern = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
-	ascigram_memset(pattern, 0, sizeof(ascigram_pattern));
-	pattern->factory = fact;
+	pat = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
+	ascigram_memset(pat, 0, sizeof(ascigram_pattern));
+	pat->factory = fact;
 	
-	ascigram_stack_init(&pattern->attrs, sizeof(ascigram_attr));
+	ascigram_stack_init(&pat->attrs, sizeof(ascigram_attr));
 
-	if (pattern->factory->init)
-		pattern->factory->init(pattern);
+	if (pat->factory->init)
+		pat->factory->init(pat);
 	
-	return pattern;
+	return pat;
 }
 
 void
-ascigram_pattern_free(ascigram_pattern *pattern)
+ascigram_pattern_free(ascigram_pattern_p pat)
 {
-	if (pattern->factory->uninit)
-		pattern->factpry->uninit(pattern);
+	if (pat->factory->uninit)
+		pat->factory->uninit(pat);
 
-	ascigram_stack_uninit(&pattern->attrs);
+	ascigram_stack_uninit(&pat->attrs);
 
-	free(pattern);
+	free(pat);
 }
 
 int
-ascigram_pattern_test(ascigram_pattern_p pattern, ascigram_cell_p cell)
+ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
 	int meta;
 	
-	if (pattern->factory->match) {
-		meta = pattern->factory->match(pattern, cell);
+	if (pat->factory->match) {
+		meta = pat->factory->match(pat, cell_p);
 		if (meta < 0) {
-			pattern->finish = meta;
+			pat->finish = meta;
 		}
 		return meta;
 	}

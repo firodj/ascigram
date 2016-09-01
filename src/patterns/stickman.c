@@ -2,26 +2,22 @@
 #include "..\pattern.h"
 
 int
-stickman_pattern_match(ascigram_pattern_p pattern, ascigram_cell_p cell);
+stickman_pattern_match(ascigram_pattern_p, ascigram_cell*);
 
 static
-ascigram_pattern stickman_pattern = {
+ascigram_factory stickman_pattern_factory = {
 	"stickman",
-	0,
-	0,
 	stickman_pattern_match,
 	NULL,
-	NULL,
-	{0,0,0,0}
-	};
+	NULL};
 	
 int
-stickman_pattern_match(ascigram_pattern_p pattern, ascigram_cell_p cell)
+stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell)
 {
-	switch(pattern->state) {
+	switch(pat->state) {
 	case 0: do {
-		pattern->state = 1;
-		return ascigram_pattern_expect(pattern, "o");
+		pat->state = 1;
+		return ascigram_pattern_expect(pat, "o");
 	case 1:
 		;
 	    } while(0);
@@ -32,5 +28,5 @@ stickman_pattern_match(ascigram_pattern_p pattern, ascigram_cell_p cell)
 
 void stickman_pattern_register()
 {
-	ascigram_patterns_register(&stickman_pattern);
+	ascigram_patterns_register(&stickman_pattern_factory);
 }

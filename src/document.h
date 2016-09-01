@@ -30,7 +30,6 @@ struct ascigram_cell {
 	ascigram_stack pattern_refs;
 };
 typedef struct ascigram_cell ascigram_cell;
-typedef struct ascigram_cell * ascigram_cell_p;
 
 struct ascigram_row {
 	uint16_t y;
