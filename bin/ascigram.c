@@ -6,6 +6,7 @@
 #include "document.h"
 #include "svg.h"
 #include "option.h"
+#include "pattern.h"
 
 #define DEF_IUNIT 1024
 #define DEF_OUNIT 64
@@ -155,6 +156,9 @@ main(int argc, char** argv)
 
 	/* Close input file */
 	if (file != stdin) fclose(file);
+
+	/* Initialize AsciGram */
+	ascigram_patterns_initialize();
 
 	/* Create the renderer */
 	renderer = ascigram_svg_renderer_new();

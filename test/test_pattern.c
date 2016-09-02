@@ -13,8 +13,6 @@ test_pattern_factory(void)
 	ascigram_factory *fact;
 	ascigram_pattern_p pat;
 
-	ascigram_patterns_initialize();
-
 	fact_i = 0;
 	fact = ascigram_patterns_iter(&fact_i);
 	

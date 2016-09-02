@@ -38,7 +38,7 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 		while (end < size && data[end] != '\n') {
 			ascigram_cell cell, *cell_p;
 			cell.ch = data[end];
-			cell.attr.meta = 0;
+			cell.attr.meta = M_NONE;
 			cell.attr.y = row_p->y;
 			cell.attr.x = x;
 			row_p->width = x;
@@ -91,6 +91,8 @@ add_pat(ascigram_document *doc, ascigram_factory* fact)
 {
 	ascigram_pattern_p pat_new = ascigram_pattern_new(fact);
     ascigram_stack_push(&doc->pattern_refs, &pat_new);
+		
+	fprintf(stderr, "create pat: 0x%x", pat_new);
 }
 
 void
@@ -169,6 +171,8 @@ reserve_patrefs(ascigram_document *doc)
 		if (!(*pat_ref)->finish != P_ACCEPT) {
 			ascigram_pattern_free(*pat_ref);
 			ascigram_stack_pick(&doc->pattern_refs, --pat_i);
+
+			fprintf(stderr, "free pat: 0x%x", *pat_ref);
 		}
 	}
 }
@@ -181,7 +185,7 @@ cells_iter(ascigram_document* doc, int* x, int* y)
 
 	while (row_p = ascigram_stack_iter(&doc->rows, y)) {
 		while (cell_p = ascigram_stack_iter(&row_p->cells, x)) {
-			y--;
+			(*y)--;
 			return cell_p;
 		}
 		*x = 0;
@@ -205,36 +209,14 @@ test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 	}
 }
 
-/**********************
- * EXPORTED FUNCTIONS *
- **********************/
-
-ascigram_document *
-ascigram_document_new(
-	const ascigram_renderer *renderer)
-{
-	ascigram_document *doc = NULL;
-
-	assert(renderer);
-
-	doc = ascigram_malloc(sizeof(ascigram_document));
-	memcpy(&doc->renderer, renderer, sizeof(ascigram_renderer));
-
-	ascigram_stack_init(&doc->rows, sizeof(ascigram_row));
-	ascigram_stack_init(&doc->pattern_refs, sizeof(ascigram_pattern_p));
-
-	return doc;
-}
-
 void
-ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint8_t *data, size_t size)
+parse_rows(ascigram_document *doc)
 {
 	ascigram_factory *fact;
 	int fact_i, x, y;
  
-    assert(doc->pattern_refs.size == 0);
-	
-	scan_rows(doc, data, size);
+    if (doc->pattern_refs.size != 0) return;
+	if (doc->rows.size == 0) return;
 
 	fact_i = 0;
 	while(fact = ascigram_patterns_iter(&fact_i)) {
@@ -257,6 +239,39 @@ ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint
 
 		reserve_patrefs(doc);
 	}
+}
+
+/**********************
+ * EXPORTED FUNCTIONS *
+ **********************/
+
+ascigram_document *
+ascigram_document_new(
+	const ascigram_renderer *renderer)
+{
+	ascigram_document *doc = NULL;
+
+	doc = ascigram_malloc(sizeof(ascigram_document));
+	ascigram_memset(doc, 0, sizeof(ascigram_document));
+
+	if (renderer)
+		memcpy(&doc->renderer, renderer, sizeof(ascigram_renderer));
+
+	ascigram_stack_init(&doc->rows, sizeof(ascigram_row));
+	ascigram_stack_init(&doc->pattern_refs, sizeof(ascigram_pattern_p));
+
+	return doc;
+}
+
+void
+ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint8_t *data, size_t size)
+{
+	ascigram_factory *fact;
+	int fact_i, x, y;
+ 
+	scan_rows(doc, data, size);
+	parse_rows(doc);
+	// TODO: something to ob
 }
 
 void
