@@ -91,8 +91,6 @@ add_pat(ascigram_document *doc, ascigram_factory* fact)
 {
 	ascigram_pattern_p pat_new = ascigram_pattern_new(fact);
     ascigram_stack_push(&doc->pattern_refs, &pat_new);
-		
-	fprintf(stderr, "create pat: 0x%x", pat_new);
 }
 
 void
@@ -171,8 +169,6 @@ reserve_patrefs(ascigram_document *doc)
 		if (!(*pat_ref)->finish != P_ACCEPT) {
 			ascigram_pattern_free(*pat_ref);
 			ascigram_stack_pick(&doc->pattern_refs, --pat_i);
-
-			fprintf(stderr, "free pat: 0x%x", *pat_ref);
 		}
 	}
 }
@@ -199,11 +195,13 @@ test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 {
 	int meta = ascigram_pattern_test(pat, cell_p);
 
-	if (meta == P_REJECT) {
-		remove_pat(doc, pat, 0);
-	} else if (meta == P_ACCEPT) {
-		apply_pat(doc, pat);
-		remove_pat(doc, pat, 1);
+    if (meta < 0) {
+		if (meta == P_ACCEPT) {
+			apply_pat(doc, pat);
+			remove_pat(doc, pat, 1);
+		} else {
+			remove_pat(doc, pat, 0);
+		}
 	} else {
 		add_meta(doc, pat, cell_p, meta);
 	}

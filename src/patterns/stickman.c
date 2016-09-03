@@ -12,14 +12,27 @@ ascigram_factory stickman_pattern_factory = {
 	NULL};
 	
 int
-stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell)
+stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
+	int meta;
 	switch(pat->state) {
 	case 0: do {
-		pat->state = 1;
-		return ascigram_pattern_expect(pat, "o");
+		meta = ascigram_pattern_expect(pat, cell_p, "o");
+		return meta;
 	case 1:
-		;
+		meta = ascigram_pattern_await(pat, cell_p, -1, 1);
+		if (meta & M_OCCUPIED) {
+			meta = ascigram_pattern_expect(pat, cell_p, "-");
+        }
+        return meta; 
+    case 2:
+        meta = ascigram_pattern_expect(pat, cell_p, "|");
+        return meta;
+    case 3:
+        meta = ascigram_pattern_expect(pat, cell_p, "-");
+        return meta;
+        
+		
 	    } while(0);
 	}
 	

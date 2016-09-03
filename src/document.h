@@ -25,7 +25,7 @@ struct ascigram_attr {
 typedef struct ascigram_attr ascigram_attr;
 
 struct ascigram_cell {
-	wchar_t ch;
+	uint8_t ch;
 	ascigram_attr attr;
 	ascigram_stack pattern_refs;
 };

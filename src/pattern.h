@@ -27,8 +27,10 @@
 #define M_DASH_START_SW 0x040000
 #define M_LINE_AFTER_SW 0x080000
 #define M_DASH_AFTER_SW 0x100000
-#define P_REJECT -1
-#define P_ACCEPT -2
+#define P_ACCEPT -1
+#define P_REJECT -2
+#define P_OUTPOS -4
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,15 +59,21 @@ struct ascigram_pattern {
 	int finish;
 	ascigram_stack attrs;
 	ascigram_cell curr;
+	ascigram_attr await;
 };
 typedef struct ascigram_pattern ascigram_pattern;
 
 void ascigram_patterns_initialize();
+void ascigram_patterns_uninit();
 void ascigram_patterns_register(ascigram_factory *fact);
+void ascigram_patterns_register_all();
 ascigram_factory* ascigram_patterns_iter(int *index);
 ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
 int ascigram_pattern_expect(ascigram_pattern_p pat, const char *);
+void ascigram_pattern_await_to(ascigram_pattern_p pat, uint16_t x, uint16_t y);
+int ascigram_pattern_await_test(ascigram_pattern_p pat);
+
 
 #ifdef __cplusplus
 }

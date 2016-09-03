@@ -8,6 +8,7 @@ ASCIGRAM_SRC = \
 	src\svg.obj \
 	src\version.obj \
 	src\pattern.obj \
+	src\patterns\patterns.obj \
 	src\patterns\stickman.obj
 
 TEST_SRC = \
