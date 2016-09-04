@@ -33,7 +33,7 @@ ascigram_pattern_new(ascigram_factory *fact)
 {
 	ascigram_pattern_p pat = NULL;
 
-	assert(fact_p);
+	assert(fact);
 
 	pat = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
 	ascigram_memset(pat, 0, sizeof(ascigram_pattern));
@@ -67,6 +67,7 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		meta = pat->factory->match(pat, cell_p);
 		if (meta < 0) {
 			pat->finish = meta;
+			meta = pat->finish == P_ACCEPT ? M_OCCUPIED : M_NONE;
 		} else if (meta > 0) {
 			// if (meta & M_OCCUPIED)
 		    pat->curr = cell_p->attr;
@@ -79,9 +80,8 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 }
 
 int
-ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect)
+ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta)
 {
-	int32_t default_meta = M_OCCUPIED;
 	uint8_t* x = (uint8_t*)expect;
 	
 	if (cell_p->attr.meta & M_OCCUPIED)

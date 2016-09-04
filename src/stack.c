@@ -25,6 +25,8 @@ ascigram_stack_uninit(ascigram_stack *st)
 
 	free(st->item);
 	st->item = NULL;
+	st->size = 0;
+	st->asize = 0;
 }
 
 void

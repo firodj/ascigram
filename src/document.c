@@ -195,8 +195,8 @@ test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 {
 	int meta = ascigram_pattern_test(pat, cell_p);
 
-    if (meta < 0) {
-		if (meta == P_ACCEPT) {
+    if (pat->finish) {
+		if (pat->finish == P_ACCEPT) {
 			apply_pat(doc, pat);
 			remove_pat(doc, pat, 1);
 		} else {

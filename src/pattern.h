@@ -60,14 +60,15 @@ struct ascigram_pattern {
 };
 typedef struct ascigram_pattern ascigram_pattern;
 
-void ascigram_patterns_init();
+void ascigram_patterns_initze();
 void ascigram_patterns_uninit();
 void ascigram_patterns_register(ascigram_factory *fact);
 void ascigram_patterns_register_all();
 ascigram_factory* ascigram_patterns_iter(int *index);
 ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
-int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect);
+int ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
+int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta);
 int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x_ofs, int16_t y_ofs);
 
 #ifdef __cplusplus
