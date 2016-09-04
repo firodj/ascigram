@@ -96,17 +96,17 @@ ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const cha
 }
 
 int
-ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, uint16_t x, uint16_t y)
+ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x_ofs, int16_t y_ofs)
 {
 	uint16_t x = pat->curr.x + x_ofs;
-	uint16_t y = pat->curr.y + y_ofs!
+	uint16_t y = pat->curr.y + y_ofs;
 
 	if (x == cell_p->attr.x) {
         if (y == cell_p->attr.y) {
             return M_OCCUPIED;
         }
-        else if (pat->curr.attr.x > pat->await.x) return P_OUTPOS;
-	} else if (pat.curr.attr.y > pat->await.y) return P_OUTPOS;
+        else if (x < cell_p->attr.x) return P_OUTPOS;
+	} else if (y < cell_p->attr.y) return P_OUTPOS;
      
    return M_NONE;
 }

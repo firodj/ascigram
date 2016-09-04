@@ -1,5 +1,5 @@
-#include "..\buffer.h"
-#include "..\pattern.h"
+#include "../buffer.h"
+#include "../pattern.h"
 
 int
 stickman_pattern_match(ascigram_pattern_p, ascigram_cell*);

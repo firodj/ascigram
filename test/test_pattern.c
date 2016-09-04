@@ -3,6 +3,7 @@
 #include "pattern.h"
 #include "test.h"
 #include <string.h>
+#include "patterns/stickman.h"
 
 int
 test_pattern_factory(void)
@@ -15,7 +16,13 @@ test_pattern_factory(void)
 
 	fact_i = 0;
 	fact = ascigram_patterns_iter(&fact_i);
+
+	EXPECT(NULL == fact, "fact = 0x%x, fact_i = %d", fact, fact_i);
 	
+	stickman_pattern_register();
+	fact_i = 0;
+	fact = ascigram_patterns_iter(&fact_i);
+
 	EXPECT(strcmp("stickman", fact->name) == 0, "fact->name: %s", fact->name);
 	
 	pat = ascigram_pattern_new(fact);
@@ -25,6 +32,8 @@ test_pattern_factory(void)
 
 	while(fact = ascigram_patterns_iter(&fact_i));
 	EXPECT(1 == fact_i, "fact_i: %d", fact_i);
+
+	ascigram_pattern_free(pat);
 
 	return results;
 }

@@ -158,7 +158,8 @@ main(int argc, char** argv)
 	if (file != stdin) fclose(file);
 
 	/* Initialize AsciGram */
-	ascigram_patterns_initialize();
+	ascigram_patterns_init();
+	ascigram_patterns_register_all();
 
 	/* Create the renderer */
 	renderer = ascigram_svg_renderer_new();
@@ -176,6 +177,8 @@ main(int argc, char** argv)
 	ascigram_buffer_free(ib);
 	ascigram_document_free(document);
 	renderer_free(renderer);
+
+	ascigram_patterns_uninit();
 
 	/* Write the result to stdout */
 	(void)fwrite(ob->data, 1, ob->size, stdout);

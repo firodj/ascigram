@@ -1,5 +1,5 @@
-#include "pattern.h"
-#include "patterns/stickman.h"
+#include "../pattern.h"
+#include "stickman.h"
 
 void
 ascigram_patterns_register_all()
