@@ -16,7 +16,7 @@ TEST_SRC = \
     test\test.obj \
     test\test_stack.obj \
 	test\test_document.obj \
-	test\test_pattern.obj \
+	test\test_pattern.obj
 
 EXE_SRC = \
 	bin\ascigram.obj \
@@ -24,19 +24,19 @@ EXE_SRC = \
 
 all: ascigram.exe
 
-ascigram.exe: $(EXE_SRC)  $(ASCIGRAM_SRC)
+ascigram.exe: $(EXE_SRC) $(ASCIGRAM_SRC)
 	$(CC) $** /link $(LDFLAGS) /out:$@
 
-test.exe: $(TEST_SRC) $(ASCIGRAM_SRC)
+testing.exe: $(TEST_SRC) $(ASCIGRAM_SRC)
 	$(CC) $** /link $(LDFLAGS) /out:$@
 
 # Housekeeping
 
 clean:
 	del $(ASCIGRAM_SRC)
-    del	$(TEST_SRC)
-	del ascigram.exe test.exe
-
+	del	$(TEST_SRC)
+	del	$(EXE_SRC)
+	del ascigram.exe testing.exe
 
 # Generic object compilations
 
@@ -46,8 +46,8 @@ clean:
 
 # Testing
 
-test: test.exe
-	test
+test: testing.exe
+	testing
 
 pattern: ascigram.exe
 	python test\runner.py

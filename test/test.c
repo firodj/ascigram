@@ -23,18 +23,19 @@ int
 main(int argc, char** argv)
 {
 	int results = 0;
+	size_t i;
 
 	int max = sizeof(test_case_items)/sizeof(test_case_items[0]);
 
-	for (size_t i = 0; i < max; i++) {
+	for (i = 0; i < max; i++) {
 		int result_case;
 		
 		fprintf(stdout, "TEST: %s ...", test_case_items[i].name);
-		// setUp
+		/* setUp */
 		ascigram_patterns_init();
-		// run
+		/* run */
 		result_case = test_case_items[i].test_case();
-		// tearDown
+		/* tearDown */
 		ascigram_patterns_uninit();
 		
 		if (result_case == 0) {

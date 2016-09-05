@@ -71,7 +71,7 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 			pat->finish = meta;
 			meta = pat->finish == P_ACCEPT ? M_OCCUPIED : M_NONE;
 		} else if (meta > 0) {
-			// if (meta & M_OCCUPIED)
+			/* if (meta & M_OCCUPIED) */
 		    pat->curr = cell_p->attr;
 		    pat->state++;
 		}

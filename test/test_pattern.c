@@ -49,16 +49,16 @@ test_pattern_stickman(void)
 	ascigram_cell cell;
 	int meta;
 
-	// Get factory for stickman
+	/* Get factory for stickman */
 	stickman_pattern_register();
 	fact_i = 0;
 	while (fact = ascigram_patterns_iter(&fact_i)) {
 		if (strcmp("stickman", fact->name) == 0) break;
 	}
 
-	EXPECT(NULL != fact, "fact is NULL");
+	EXPECT(NULL != fact, "fact 0x%x shoudnot NULL", fact);
 	
-	// Check state for Stickman
+	/* Check state for Stickman */
 	pat = ascigram_pattern_new(fact);
 
 	EXPECT(0 == pat->state, "pat->state: %d", pat->state);
@@ -75,7 +75,6 @@ test_pattern_stickman(void)
 
 	ascigram_pattern_free(pat);
 
-	//
 	pat = ascigram_pattern_new(fact);
 
 	ascigram_memset(&cell, 0, sizeof(ascigram_cell));
@@ -87,7 +86,6 @@ test_pattern_stickman(void)
 	EXPECT(M_OCCUPIED == meta, "meta: 0x%x", meta);
 	EXPECT(1 == pat->curr.x, "pat->curr.x: %d", pat->curr.x);
 
-	//
 	ascigram_memset(&cell, 0, sizeof(ascigram_cell));
 	cell.ch = ' ';
 	cell.attr.x = 2;
@@ -97,7 +95,6 @@ test_pattern_stickman(void)
 	EXPECT(M_NONE == meta, "meta: 0x%x", meta);
 	EXPECT(1 == pat->curr.x, "pat->curr.x: %d", pat->curr.x);
 
-	//
 	ascigram_memset(&cell, 0, sizeof(ascigram_cell));
 	cell.ch = '-';
 	cell.attr.x = 0;

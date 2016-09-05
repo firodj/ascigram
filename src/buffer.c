@@ -65,6 +65,8 @@ ascigram_memcpy(void *dest, const void *src, size_t size) {
 		fprintf(stderr, "Memcopy failed.\n");
 		abort();
 	}
+
+	return ret;
 }
 
 void *

@@ -46,6 +46,7 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 			ascigram_stack_init(&cell.pattern_refs, sizeof(ascigram_pattern_p));
 
 			cell_p = ascigram_stack_push(&row_p->cells, &cell);
+			if (!cell_p) ;
 
 			end++;
 			x++;
@@ -270,12 +271,9 @@ ascigram_document_new(
 void
 ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const uint8_t *data, size_t size)
 {
-	ascigram_factory *fact;
-	int fact_i, x, y;
- 
 	scan_rows(doc, data, size);
 	parse_rows(doc);
-	// TODO: something to ob
+	/* TODO: something to ob */
 }
 
 void

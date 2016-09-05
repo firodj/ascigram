@@ -1,4 +1,4 @@
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__MINGW32__)
 #include <windows.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -171,9 +171,9 @@ retry:
                 ((attr & FOREGROUND_MASK) << 4) |
                 ((attr & BACKGROUND_MASK) >> 4);
             else if (v[i] == 10)
-              ; // symbol on
+              ; /* symbol on */
             else if (v[i] == 11)
-              ; // symbol off
+              ; /* symbol off */
             else if (v[i] == 22)
               attr &= ~FOREGROUND_INTENSITY;
             else if (v[i] == 24)
@@ -193,8 +193,8 @@ retry:
               if ((v[i] - 30) & 4)
                 attr |= FOREGROUND_BLUE;
             }
-            //else if (v[i] == 39)
-            //attr = (~attr & BACKGROUND_MASK);
+            /* else if (v[i] == 39) */
+            /* attr = (~attr & BACKGROUND_MASK); */
             else if (v[i] >= 40 && v[i] <= 47) {
               attr = (attr & FOREGROUND_MASK);
               if ((v[i] - 40) & 1)
@@ -204,8 +204,8 @@ retry:
               if ((v[i] - 40) & 4)
                 attr |= BACKGROUND_BLUE;
             }
-            //else if (v[i] == 49)
-            //attr = (~attr & FOREGROUND_MASK);
+            /* else if (v[i] == 49) */
+            /* attr = (~attr & FOREGROUND_MASK); */
             else if (v[i] == 100)
               attr = attr_old;
           }
@@ -299,8 +299,8 @@ _fprintf_w32(FILE* fp, const char* format, ...) {
   int len;
   char *buf = NULL;
   va_start(args, format);
-  len = _vscprintf(format, args) // _vscprintf doesn't count
-                            + 1; // terminating '\0'
+  len = _vscprintf(format, args) /* _vscprintf doesn't count */
+                            + 1; /* terminating '\0' */
   buf = (char*)malloc(len * sizeof(char));
   r = vsprintf(buf, format, args);
   va_end(args);
@@ -316,4 +316,4 @@ _fputs_w32(FILE* fp, const char* s) {
   r += __write_w32(fp, "\n");
   return r;
 }
-#endif
+#endif /** _WIN32 **/
