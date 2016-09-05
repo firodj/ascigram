@@ -31,39 +31,28 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	stickman_opaque *opaque = (stickman_opaque*)pat->opaque;
 	switch(pat->state) {
 	case 0: do {
-		meta = ascigram_pattern_expect(pat, cell_p, "O", M_OCCUPIED);
-		if (meta & M_OCCUPIED) {
-			opaque->x = cell_p->attr.x;
-			opaque->y = cell_p->attr.y;
-		}
-		return meta;
+		opaque->x = cell_p->attr.x;
+		opaque->y = cell_p->attr.y;
+
+		return ascigram_pattern_expect(pat, cell_p, "O", M_OCCUPIED);
 	case 1:
 		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-1, pat->curr.y+1);
-		if (meta & M_OCCUPIED) {
-			meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-        }
-        return meta; 
-    case 2:
-        meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
-        return meta;
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 2:
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
     case 3:
-        meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-        return meta;
-	case 4:
-		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-2, pat->curr.y+1);
-		if (meta & M_OCCUPIED) {
-			meta = ascigram_pattern_expect(pat, cell_p, "/", M_OCCUPIED);
-		}
-		return meta;
+        return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
+    case 4:
+        return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
 	case 5:
-        meta = ascigram_pattern_expect(pat, cell_p, " ", M_OCCUPIED);
-        return meta;
+		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-2, pat->curr.y+1);
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
 	case 6:
-        meta = ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED);
-		if (meta & M_OCCUPIED) {
-			pat->finish = P_FINISH;
-		}
-        return meta;
+		return ascigram_pattern_expect(pat, cell_p, "/", M_OCCUPIED);
+	case 7:
+        return ascigram_pattern_expect(pat, cell_p, " ", M_OCCUPIED);
+	case 8:
+        return ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED|P_FINISH);
 	    } while(0);
 	}
 	

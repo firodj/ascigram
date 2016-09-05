@@ -8,6 +8,7 @@ typedef struct documentbox_opaque {
 	uint16_t l;
 	uint16_t w;
 	uint16_t h;
+	uint8_t fold;
 } documentbox_opaque;
 
 static
@@ -32,8 +33,9 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	int meta;
 	documentbox_opaque *opaque = (documentbox_opaque*)pat->opaque;
 	switch(pat->state) {
+	/* Top part with(out) fold */
 	case 0: do {
-		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
+		meta = ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
 		if (meta & M_OCCUPIED) {
 			opaque->t = cell_p->attr.y;
 			opaque->l = cell_p->attr.x;
@@ -45,16 +47,27 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	case 2:
 		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S);
 		if (meta & M_OCCUPIED) {
+			opaque->fold = 1;
+			opaque->w = cell_p->attr.x - opaque->l + 1 + 2;
+			return meta;
+		}
+
+		meta = ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_S);
+		if (meta & M_OCCUPIED) {
+			opaque->fold = 0;
 			opaque->w = cell_p->attr.x - opaque->l + 1;
-		} else {
-			meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
-			if (meta & M_OCCUPIED) {
-				pat->state--;
-			}
+			return meta;
+		}
+
+		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
+		if (meta & M_OCCUPIED) {
+			pat->state--;
 		}
 		return meta;
 	case 3:
 		return M_BOX_AFTER_E;
+
+
 	case 4:		
 		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + 1);
 		if (meta & M_OCCUPIED) {

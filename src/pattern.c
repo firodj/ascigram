@@ -60,29 +60,34 @@ ascigram_pattern_free(ascigram_pattern_p pat)
 	free(pat);
 }
 
-int
+uint32_t
 ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
-	int meta;
+	uint32_t meta;
 	
 	if (pat->factory->match) {
 		meta = pat->factory->match(pat, cell_p);
-		if (meta < 0) {
+		if (meta & E_RESULT) {
 			/* if REJECTED but ACCEPTED then FINISH */
 			if (pat->finish == P_ACCEPT) {
 				pat->finish = P_FINISH;
 			} else {
-				pat->finish = meta;
+				pat->finish = (meta & E_RESULT);
 			}
-			meta = M_NONE;
-		} else if (meta > 0) {
+
+			if (pat->finish & E_FAIL) {
+				meta = M_NONE;
+			}
+		} 
+		if (meta & E_MASK) {
 		    pat->curr = cell_p->attr;
 		    pat->state++;
 		}
-		return meta;
+		return (meta & E_MASK);
 	}
 	
-	return P_REJECT;
+	pat->finish = P_REJECT;
+	return M_NONE;
 }
 
 int

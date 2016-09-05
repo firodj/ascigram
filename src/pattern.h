@@ -27,11 +27,15 @@
 #define M_DASH_START_SW 0x040000
 #define M_LINE_AFTER_SW 0x080000
 #define M_DASH_AFTER_SW 0x100000
-#define P_ACCEPT -1
-#define P_FINISH -2
-#define P_REJECT -4
-#define P_OUTPOS -8
+#define P_ACCEPT 0x80000000
+#define P_FINISH 0xC0000000
+#define P_REJECT 0xE0000000
+#define P_OUTPOS 0xD0000000
 
+#define E_STOP   0x40000000
+#define E_FAIL   0x30000000
+#define E_RESULT 0xF0000000
+#define E_MASK   0x0FFFFFFF
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +44,7 @@ extern "C" {
 struct ascigram_pattern;
 typedef struct ascigram_pattern * ascigram_pattern_p;
 
-typedef int (*ascigram_pattern_match_f)(ascigram_pattern_p, ascigram_cell*);
+typedef uint32_t (*ascigram_pattern_match_f)(ascigram_pattern_p, ascigram_cell*);
 typedef void (*ascigram_pattern_f)(ascigram_pattern_p);
 
 struct ascigram_factory {
@@ -70,7 +74,7 @@ void ascigram_patterns_register_all();
 ascigram_factory* ascigram_patterns_iter(int *index);
 ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
-int ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
+uint32_t ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
 int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta);
 int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y);
 

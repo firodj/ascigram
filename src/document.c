@@ -206,7 +206,11 @@ cells_iter(ascigram_document* doc, int* x, int* y)
 void
 test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 {
-	int meta = ascigram_pattern_test(pat, cell_p);
+	uint32_t meta;
+
+	if (pat->finish & E_STOP) return;
+
+    meta = ascigram_pattern_test(pat, cell_p);
 
     if (pat->finish && (pat->finish != P_ACCEPT)) {
 		if (pat->finish == P_FINISH) {
@@ -245,8 +249,6 @@ parse_rows(ascigram_document *doc)
 
 			pat_i = pat_i_hold;
 			while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-				if ((*pat_ref)->finish <= P_FINISH) continue;
-
 				test_cell(doc, *pat_ref, cell_p);
 			}
 		}
