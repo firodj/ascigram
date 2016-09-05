@@ -58,6 +58,9 @@ struct ascigram_document {
 
 	ascigram_stack rows;
 	ascigram_stack pattern_refs;
+
+	uint16_t height;
+	uint16_t width;
 };
 typedef struct ascigram_document ascigram_document;
 
@@ -75,6 +78,9 @@ void ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const
 
 /* ascigram_document_free: deallocate a document processor instance */
 void ascigram_document_free(ascigram_document *doc);
+
+void dump_document_cells(ascigram_document *doc);
+void dump_document_patrefs(ascigram_document *doc);
 
 #ifdef __cplusplus
 }

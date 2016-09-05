@@ -1,8 +1,8 @@
-
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include "ansicolor-w32.h"
 
 #include "document.h"
 #include "pattern.h"
@@ -24,6 +24,7 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 {
 	size_t end = 0;
 	int y = 0, x;
+	doc->width = 0;
 
 	while (end < size) {
 		ascigram_row row, *row_p;
@@ -48,10 +49,14 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 
 			end++;
 			x++;
+
+			if (doc->width < x) doc->width = x;
 		}
 
 		if (data[end] == '\n') end++;
 		y++;
+
+		doc->height = y;
 	}
 }
 
@@ -286,4 +291,67 @@ ascigram_document_free(ascigram_document *doc)
 	free_rows(doc);	
 	ascigram_stack_uninit(&doc->rows);
 	free(doc);
+}
+
+void
+dump_document_cells(ascigram_document *doc)
+{
+	int x, y, y_now, x_old;
+	ascigram_cell *cell_p;
+	x = 0; y = 0;
+	fprintf(stdout, "\033[0;37m");
+	fprintf(stdout, "\nwidth: %d, height: %d", doc->width, doc->height);
+	while (cell_p = cells_iter(doc, &x, &y)) {
+		if (x==1) {
+			x = 0;
+			y_now = y;
+			fprintf(stdout, "\n\033[33m%d\033[0m:", y);		
+			while (cell_p = cells_iter(doc, &x, &y)) {
+				if (y != y_now) break;
+				fprintf(stdout, " %06x", cell_p->attr.meta);
+
+				x_old = x;
+			}
+			if (doc->width > x_old) {
+				for(x=x_old; x < doc->width; x++) {
+					fprintf(stdout, " ......");
+				}	
+			}
+
+			y = y_now;
+			x = 0;
+
+			fprintf(stdout, ": ");
+
+			while (cell_p = cells_iter(doc, &x, &y)) {
+				if (y != y_now) break;
+				if (cell_p->attr.meta & M_OCCUPIED) {
+					fprintf(stdout, "\033[41m");
+				}
+				fprintf(stdout, "%c\033[0m", cell_p->ch);				
+				x_old = x;
+			}
+
+            y = y_now;
+            x = x_old;
+		}
+	}
+	fprintf(stdout, "\n");
+}
+
+void
+dump_document_patrefs(ascigram_document *doc)
+{
+	ascigram_pattern_p *pat_ref;
+	int pat_i = 0;
+	fprintf(stdout, "\033[0;37m");
+	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
+		fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);		
+		fprintf(stdout, "\t- name: %s\n", (*pat_ref)->factory->name);
+		fprintf(stdout, "\t- state: %d\n", (*pat_ref)->state);
+		if ((*pat_ref)->factory->dump) {
+			(*pat_ref)->factory->dump(*pat_ref);
+		}
+	}
+	fprintf(stdout, "\n");
 }

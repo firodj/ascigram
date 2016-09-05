@@ -9,18 +9,22 @@ ASCIGRAM_SRC = \
 	src\version.obj \
 	src\pattern.obj \
 	src\patterns\patterns.obj \
-	src\patterns\stickman.obj
+	src\patterns\stickman.obj \
+    util\ansicolor-w32.obj
 
 TEST_SRC = \
     test\test.obj \
     test\test_stack.obj \
 	test\test_document.obj \
 	test\test_pattern.obj \
-    util\ansicolor-w32.obj
+
+EXE_SRC = \
+	bin\ascigram.obj \
+	bin\option.obj
 
 all: ascigram.exe
 
-ascigram.exe: bin\ascigram.obj bin\option.obj $(ASCIGRAM_SRC)
+ascigram.exe: $(EXE_SRC)  $(ASCIGRAM_SRC)
 	$(CC) $** /link $(LDFLAGS) /out:$@
 
 test.exe: $(TEST_SRC) $(ASCIGRAM_SRC)

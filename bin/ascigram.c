@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "version.h"
 #include "document.h"
 #include "svg.h"
 #include "option.h"
@@ -36,9 +37,18 @@ print_help(const char *basename)
 	/* main options */
 	printf("Main options:\n");
 	print_option('h', "help", "Show this help usage.");
+	print_option('v', "version", "Print ascigram version.");
 	print_option('T', "time", "Show time spent in rendering.");
+	print_option('d', "dump", "Dump document state.");
 
 }
+
+void
+print_version()
+{
+	printf("Build with AsciGram " ASCIGRAM_VERSION ".\n");
+}
+
 
 /* OPTION PARSING */
 
@@ -48,6 +58,7 @@ struct option_data {
 
 	/* time reporting */
 	int show_time;
+	int dump;
 	
     /* I/O */
 
@@ -69,8 +80,18 @@ parse_short_option(char opt, char *next, void *opaque)
 		return 0;
 	}
 
+	if (opt == 'v') {
+		print_version();
+		data->done = 1;
+		return 0;
+	}
+
 	if (opt == 'T') {
 		data->show_time = 1;
+		return 1;
+	}
+	if (opt == 'd') {
+		data->dump = 1;
 		return 1;
 	}
 
@@ -90,8 +111,18 @@ parse_long_option(char *opt, char *next, void *opaque)
 		return 0;
 	}
 
+	if (strcmp(opt, "version")==0) {
+		print_version();
+		data->done = 1;
+		return 0;
+	}
+
 	if (strcmp(opt, "time")==0) {
 		data->show_time = 1;
+		return 1;
+	}
+	if (strcmp(opt, "dump")==0) {
+		data->dump = 1;
 		return 1;
 	}
 
@@ -128,6 +159,7 @@ main(int argc, char** argv)
 	/* Parse options */
 	data.basename = argv[0];
 	data.done = 0;
+	data.dump = 0;
 	data.show_time = 0;
 	data.iunit = DEF_IUNIT;
 	data.ounit = DEF_OUNIT;
@@ -173,10 +205,17 @@ main(int argc, char** argv)
 	ascigram_document_render(document, ob, ib->data, ib->size);
 	t2 = clock();
 
+	if (data.dump) {
+		dump_document_cells(document);
+		dump_document_patrefs(document);
+	}
+
 	/* Cleanup */
 	ascigram_buffer_free(ib);
 	ascigram_document_free(document);
-	renderer_free(renderer);
+
+	if (renderer_free)
+		renderer_free(renderer);
 
 	ascigram_patterns_uninit();
 
