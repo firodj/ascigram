@@ -11,7 +11,8 @@ ASCIGRAM_SRC = \
     util\ansicolor-w32.obj \
 	src\patterns\patterns.obj \
 	src\patterns\stickman.obj \
-	src\patterns\dbcylinder.obj
+	src\patterns\dbcylinder.obj \
+	src\patterns\documentbox.obj
 
 TEST_SRC = \
     test\test.obj \

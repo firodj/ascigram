@@ -9,6 +9,7 @@ int test_document_cells_iter(void);
 int test_pattern_stickman(void);
 int test_document_stickman(void);
 int test_document_dbcylinder(void);
+int test_document_documentbox(void);
 
 static 
 test_case_item_t test_case_items[] = {
@@ -18,7 +19,8 @@ test_case_item_t test_case_items[] = {
 	{"Document Cells Iter", test_document_cells_iter},
 	{"Pattern Stickman", test_pattern_stickman},
 	{"Document Stickman", test_document_stickman},
-	{"Document DbCylinder", test_document_dbcylinder}
+	{"Document DbCylinder", test_document_dbcylinder},
+	{"Document DocumentBox", test_document_documentbox}
 };
 
 int

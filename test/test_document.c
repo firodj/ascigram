@@ -27,6 +27,18 @@ static const char *data_dbcylinder = " \n"
 	" '---'\n"
 	"      \n";
 
+static const char *data_documentbox = " \n"
+	" +---. \n"
+	" |  |_\\\n"
+	" |     |\n"
+	" +-----+\n"
+	"        \n"
+	" +-----+\n"
+	" |     |\n"
+	" |     |\n"
+	" '._.-.|\n"
+	"        \n";
+
 int
 test_document_cells_iter(void)
 {
@@ -77,6 +89,8 @@ test_document_stickman(void)
 	dump_document_cells(doc);
 	dump_document_patrefs(doc);
 
+	EXPECT(1 == doc->pattern_refs.size, "doc->pattern_refs.size = %d", doc->pattern_refs.size);
+
 	ascigram_document_free(doc);
 
 	return results;
@@ -99,6 +113,33 @@ test_document_dbcylinder(void)
 
 	dump_document_cells(doc);
 	dump_document_patrefs(doc);
+
+	EXPECT(1 == doc->pattern_refs.size, "doc->pattern_refs.size = %d", doc->pattern_refs.size);
+
+	ascigram_document_free(doc);
+
+	return results;
+}
+
+int
+test_document_documentbox(void)
+{
+	int results = 0;
+	ascigram_cell *cell_p;
+	int x, y;
+	int expect_x,expect_y;
+	
+	ascigram_document *doc = ascigram_document_new(NULL);
+
+	ascigram_patterns_register_all();
+
+	scan_rows(doc, data_documentbox, strlen(data_documentbox));
+	parse_rows(doc);
+
+	dump_document_cells(doc);
+	dump_document_patrefs(doc);
+
+	EXPECT(2 == doc->pattern_refs.size, "doc->pattern_refs.size = %d", doc->pattern_refs.size);
 
 	ascigram_document_free(doc);
 

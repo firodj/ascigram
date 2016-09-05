@@ -13,9 +13,11 @@ ASCIGRAM_SRC = \
 	src/svg.o \
 	src/version.o \
 	src/pattern.o \
+	util/ansicolor-w32.o
 	src/patterns/patterns.o \
 	src/patterns/stickman.o \
-	util/ansicolor-w32.o
+	src/patterns/dbcylinder.o \
+	src/patterns/documentbox.o
 
 TEST_SRC = \
 	test/test.o \

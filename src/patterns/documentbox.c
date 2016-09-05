@@ -8,7 +8,7 @@ typedef struct documentbox_opaque {
 	uint16_t l;
 	uint16_t w;
 	uint16_t h;
-	uint8_t fold;
+	uint8_t fold, wave;
 } documentbox_opaque;
 
 static
@@ -35,16 +35,14 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	switch(pat->state) {
 	/* Top part with(out) fold */
 	case 0: do {
-		meta = ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
-		if (meta & M_OCCUPIED) {
-			opaque->t = cell_p->attr.y;
-			opaque->l = cell_p->attr.x;
-		}
-		return meta;
+		opaque->t = cell_p->attr.y;
+		opaque->l = cell_p->attr.x;
+
+		return ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
 	case 1:
-		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
-		return meta;
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
 	case 2:
+		opaque->h = 1;
 		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S);
 		if (meta & M_OCCUPIED) {
 			opaque->fold = 1;
@@ -59,93 +57,113 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 			return meta;
 		}
 
-		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
-		if (meta & M_OCCUPIED) {
-			pat->state--;
-		}
-		return meta;
+		pat->state--;
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
 	case 3:
+		if (!opaque->fold) pat->state = 11 -1; /* To: Body */
 		return M_BOX_AFTER_E;
 
-
-	case 4:		
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + 1);
-		if (meta & M_OCCUPIED) {
-			meta = ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-        }
-		return meta;
-	case 5:
-		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-		if (meta & M_OCCUPIED) {
-			if ((cell_p->attr.x - opaque->l) < (opaque->w - 2)) {
-				pat->state--;
-			}
-		}
-		return meta;
-	case 6:		
-		meta = ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-		if (meta & M_OCCUPIED) {
-			opaque->h = cell_p->attr.y - opaque->t + 1;
-		}
-		return meta;
-	case 7:		
-		return M_BOX_AFTER_E;
-	case 8:
+	/* Fold */
+	case 4:
 		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
-		if (meta & M_OCCUPIED) {
-			meta = ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-			if (meta & M_OCCUPIED) {
-				if (opaque->h > 2) {
-					pat->state = 9;
-				} else {
-					meta = P_REJECT;
-				}
-			} else {
-				meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E);
-			}
-		}
-		return meta;
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 5:
+		return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E);
+	case 6:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w-4, opaque->t + opaque->h);
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 7:
+		return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
+	case 8:
+		return ascigram_pattern_expect(pat, cell_p, "_", M_OCCUPIED);
 	case 9:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, pat->curr.y);
-		if (meta & M_OCCUPIED) {
-			meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
-			if (meta & M_OCCUPIED) {
-				opaque->h++;
-				pat->state = 6;
-			}
-		}
-		return meta;
+		opaque->h = cell_p->attr.y - opaque->t + 1;
+		return ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED|M_BOX_START_S);
 	case 10:
-		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-		if (meta & M_OCCUPIED) {
-			if ((cell_p->attr.x - opaque->l) < (opaque->w - 2)) {
-				pat->state--;
-			}
-		}
-		return meta;
+		return M_BOX_AFTER_E;
+
+	/* Body */
 	case 11:
-		meta = ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED);
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 12:
+		meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E);
+		if (meta & M_OCCUPIED) return meta;
+
+		if (opaque->h < opaque->fold + 2) return P_REJECT;
+		
+		pat->state = 16 -1; /* To: Bottom-Wave */
+		opaque->wave = 1;
+		meta = ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
+		if ((meta & M_OCCUPIED) || !opaque->fold) return meta;
+		
+		pat->state = 21 -1; /* To: Bottom-Flat */
+		return ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_E);
+	case 13:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, pat->curr.y);
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 14:
+		opaque->h++;
+		return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
+	case 15:
+		pat->state = 11 -1; /* To: Body */
+		return M_BOX_AFTER_E;
+
+	/* Bottom-Wave */
+	case 16:
+		return ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED);
+	
+	/* Wave */
+	case 17:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, opaque->t + opaque->h);
+		if (meta & E_FAIL) return meta;
 		if (meta & M_OCCUPIED) {
 			opaque->h++;
-			pat->finish = P_ACCEPT;
+			pat->state = 23 -1; /* To: Corner */
+			return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED | P_ACCEPT);
 		}
-		return meta;
-	case 12:
-		return M_BOX_AFTER_E;
-	case 13:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
+
+		return ascigram_pattern_expect(pat, cell_p, "_", M_OCCUPIED);
+	case 18:
+		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED);
+		if (meta & M_OCCUPIED) return meta;
+		
+		pat->state--;
+		return ascigram_pattern_expect(pat, cell_p, "_", M_OCCUPIED);
+	case 19:
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
+	case 20:
+		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED);
 		if (meta & M_OCCUPIED) {
-			meta = M_BOX_AFTER_S;
+			pat->state = 17 -1; /* To: Wave */
+			return meta;
 		}
-		return meta;
-	case 14:
-		meta = M_BOX_AFTER_S;
-		if ((cell_p->attr.x - opaque->l) >= opaque->w-1) {
-			pat->finish = P_FINISH;
-		} else {
-			pat->state--;
-		}
-		return meta;
+		
+		pat->state--;
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
+
+	/* Bottom-Flat */
+	case 21:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 2, opaque->t + opaque->h);
+		if (!(meta & M_OCCUPIED)) pat->state--;
+		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
+	case 22:
+		opaque->h++;
+		return ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|P_ACCEPT);
+
+	/* Corner */
+	case 23:
+		return M_BOX_AFTER_E;
+
+	/* Extras */
+	case 24:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
+		if (meta & M_OCCUPIED) pat->state++; else return meta;
+	case 25:
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, opaque->t + opaque->h);
+		if (meta & M_OCCUPIED) return M_BOX_AFTER_S | P_FINISH;
+		pat->state--;
+		return M_BOX_AFTER_S;
 		} while(0);
 	}
 

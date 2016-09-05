@@ -74,7 +74,9 @@ dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E);
 		if (meta & M_OCCUPIED) return meta;
 
-		if (opaque->h > 2) pat->state = 14 -1; /* Bottom */	else return P_REJECT;
+		if (opaque->h < 3) return P_REJECT;
+	   
+		pat->state = 14 -1; /* To: Bottom */
 		return ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
 	case 11:
 		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, pat->curr.y);
@@ -88,10 +90,9 @@ dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 
 	/* Bottom */
 	case 14: 
-		if (cell_p->attr.y != (opaque->t + opaque->h)) return P_REJECT;
-		
-		if ((cell_p->attr.x - opaque->l) < (opaque->w - 2)) pat->state--;
-
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 2, opaque->t + opaque->h);
+		if (meta & E_FAIL) return meta;
+		if (!(meta & M_OCCUPIED)) pat->state--;
 		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
 	case 15:
 		opaque->h++;
@@ -104,14 +105,12 @@ dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
 		if (meta & M_OCCUPIED) pat->state++; else return meta;
 	case 18:
-		if (cell_p->attr.y != (opaque->t + opaque->h)) return P_REJECT;
+		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, opaque->t + opaque->h);
+		if (meta & E_FAIL) return meta;
+		if (meta & M_OCCUPIED) return M_BOX_AFTER_S | P_FINISH;
+		pat->state--;
+		return M_BOX_AFTER_S;
 
-		meta = M_BOX_AFTER_S;
-		if ((cell_p->attr.x - opaque->l) >= opaque->w-1)
-			meta |= P_FINISH;
-		else
-			pat->state--;
-		return meta;
 		} while(0);
 	}
 
