@@ -1,4 +1,3 @@
-#include "../buffer.h"
 #include "../pattern.h"
 
 int stickman_pattern_match(ascigram_pattern_p, ascigram_cell*);
@@ -18,6 +17,13 @@ ascigram_factory stickman_pattern_factory = {
 	stickman_pattern_dump,
 	sizeof(stickman_opaque)};
 
+void stickman_pattern_register()
+{
+	ascigram_patterns_register(&stickman_pattern_factory);
+}
+
+/* IMPLEMENTATION */
+
 int
 stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
@@ -32,7 +38,7 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		}
 		return meta;
 	case 1:
-		meta = ascigram_pattern_await(pat, cell_p, -1, 1);
+		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-1, pat->curr.y+1);
 		if (meta & M_OCCUPIED) {
 			meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
         }
@@ -44,7 +50,7 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
         meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
         return meta;
 	case 4:
-		meta = ascigram_pattern_await(pat, cell_p, -2, 1);
+		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-2, pat->curr.y+1);
 		if (meta & M_OCCUPIED) {
 			meta = ascigram_pattern_expect(pat, cell_p, "/", M_OCCUPIED);
 		}
@@ -53,12 +59,15 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
         meta = ascigram_pattern_expect(pat, cell_p, " ", M_OCCUPIED);
         return meta;
 	case 6:
-        meta = ascigram_pattern_expect(pat, cell_p, "\\", P_ACCEPT);
+        meta = ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED);
+		if (meta & M_OCCUPIED) {
+			pat->finish = P_FINISH;
+		}
         return meta;
 	    } while(0);
 	}
 	
-	return -1;
+	return P_REJECT;
 }
 
 void
@@ -69,7 +78,3 @@ stickman_pattern_dump(ascigram_pattern_p pat)
 	fprintf(stdout, "\t- y: %d\n", opaque->y);
 }
 
-void stickman_pattern_register()
-{
-	ascigram_patterns_register(&stickman_pattern_factory);
-}

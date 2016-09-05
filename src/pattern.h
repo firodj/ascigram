@@ -28,8 +28,9 @@
 #define M_LINE_AFTER_SW 0x080000
 #define M_DASH_AFTER_SW 0x100000
 #define P_ACCEPT -1
-#define P_REJECT -2
-#define P_OUTPOS -4
+#define P_FINISH -2
+#define P_REJECT -4
+#define P_OUTPOS -8
 
 
 #ifdef __cplusplus
@@ -71,7 +72,7 @@ ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
 int ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
 int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta);
-int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x_ofs, int16_t y_ofs);
+int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y);
 
 #ifdef __cplusplus
 }

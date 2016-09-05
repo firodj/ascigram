@@ -8,9 +8,10 @@ ASCIGRAM_SRC = \
 	src\svg.obj \
 	src\version.obj \
 	src\pattern.obj \
+    util\ansicolor-w32.obj \
 	src\patterns\patterns.obj \
 	src\patterns\stickman.obj \
-    util\ansicolor-w32.obj
+	src\patterns\dbcylinder.obj
 
 TEST_SRC = \
     test\test.obj \

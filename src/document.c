@@ -34,9 +34,9 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 		ascigram_stack_init(&row.cells, sizeof(ascigram_cell));
 
 		row_p = ascigram_stack_push(&doc->rows, &row);
-		
+
 		x = 0;
-		while (end < size && data[end] != '\n') {
+		while (end < size) {
 			ascigram_cell cell, *cell_p;
 			cell.ch = data[end];
 			cell.attr.meta = M_NONE;
@@ -52,9 +52,10 @@ scan_rows(ascigram_document *doc, const uint8_t *data, size_t size)
 			x++;
 
 			if (doc->width < x) doc->width = x;
+
+			if (cell.ch == '\n') break;
 		}
 
-		if (data[end] == '\n') end++;
 		y++;
 
 		doc->height = y;
@@ -84,10 +85,10 @@ get_cell(ascigram_document *doc, uint16_t x, uint16_t y)
 {
 	ascigram_row *row;
 	ascigram_cell *cell;
-	
+
 	row = ascigram_stack_get(&doc->rows, y);
 	if (!row) return NULL;
-	
+
 	cell = ascigram_stack_get(&row->cells, x);
 	return cell;
 }
@@ -104,7 +105,7 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 {
 	int attr_i;
 	ascigram_attr *attr_p;
-	
+
 	if (!pat->finish)
        pat->finish = P_REJECT;
 
@@ -115,7 +116,7 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 			ascigram_pattern **pat_ref;
 			ascigram_cell *cell_p = get_cell(doc, attr_p->x, attr_p->y);
 			if (!cell_p) continue;
-			
+
 			if (cooc) {
 				while (pat_ref = ascigram_stack_iter(&cell_p->pattern_refs, &ref_i)) {
 					pat_ref = ascigram_stack_pick(&cell_p->pattern_refs, --ref_i);
@@ -134,7 +135,7 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 			}
 		}
 	}
-	
+
     pat->attrs.size = 0;
 }
 
@@ -154,14 +155,14 @@ apply_pat(ascigram_document *doc, ascigram_pattern_p pat)
 {
     int attr_i;
 	ascigram_attr *attr_p;
-	
-	if (pat->finish != P_ACCEPT) return;
+
+	if (pat->finish != P_FINISH) return;
 
 	attr_i = 0;
 	while (attr_p = ascigram_stack_iter(&pat->attrs, &attr_i)) {
 		ascigram_cell *cell_p = get_cell(doc, attr_p->x, attr_p->y);
 		if (!cell_p) continue;
-		
+
 		cell_p->attr.meta |= attr_p->meta;
 	}
 }
@@ -172,7 +173,13 @@ reserve_patrefs(ascigram_document *doc)
 	ascigram_pattern **pat_ref;
 	int pat_i = 0;
 	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-		if ((*pat_ref)->finish != P_ACCEPT) {
+		if ((*pat_ref)->finish == P_ACCEPT) {
+			/* ACCEPT but uncomplete */
+			(*pat_ref)->finish = P_FINISH;
+			apply_pat(doc, *pat_ref);
+			remove_pat(doc, *pat_ref, 1);
+		}
+		if ((*pat_ref)->finish != P_FINISH) {
 			ascigram_pattern_free(*pat_ref);
 			ascigram_stack_pick(&doc->pattern_refs, --pat_i);
 		}
@@ -201,8 +208,8 @@ test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 {
 	int meta = ascigram_pattern_test(pat, cell_p);
 
-    if (pat->finish) {
-		if (pat->finish == P_ACCEPT) {
+    if (pat->finish && (pat->finish != P_ACCEPT)) {
+		if (pat->finish == P_FINISH) {
 			add_meta(doc, pat, cell_p, meta);
 			apply_pat(doc, pat);
 			remove_pat(doc, pat, 1);
@@ -219,7 +226,7 @@ parse_rows(ascigram_document *doc)
 {
 	ascigram_factory *fact;
 	int fact_i, x, y;
- 
+
     if (doc->pattern_refs.size != 0) return;
 	if (doc->rows.size == 0) return;
 
@@ -227,16 +234,18 @@ parse_rows(ascigram_document *doc)
 	while(fact = ascigram_patterns_iter(&fact_i)) {
 		ascigram_pattern **pat_ref;
 		ascigram_cell *cell_p;
+		int pat_i_hold = doc->pattern_refs.size;
 		y = 0;
 		x = 0;
 
 		while (cell_p = cells_iter(doc, &x, &y)) {
 			int pat_i;
+
 			add_pat(doc, fact);
-			
-			pat_i = 0;
+
+			pat_i = pat_i_hold;
 			while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-				if ((*pat_ref)->finish) continue;
+				if ((*pat_ref)->finish <= P_FINISH) continue;
 
 				test_cell(doc, *pat_ref, cell_p);
 			}
@@ -286,7 +295,7 @@ ascigram_document_free(ascigram_document *doc)
 	}
 	ascigram_stack_uninit(&doc->pattern_refs);
 
-	free_rows(doc);	
+	free_rows(doc);
 	ascigram_stack_uninit(&doc->rows);
 	free(doc);
 }
@@ -303,7 +312,7 @@ dump_document_cells(ascigram_document *doc)
 		if (x==1) {
 			x = 0;
 			y_now = y;
-			fprintf(stdout, "\n\033[33m%d\033[0m:", y);		
+			fprintf(stdout, "\n\033[33m%d\033[0m:", y);
 			while (cell_p = cells_iter(doc, &x, &y)) {
 				if (y != y_now) break;
 				fprintf(stdout, " %06x", cell_p->attr.meta);
@@ -313,7 +322,7 @@ dump_document_cells(ascigram_document *doc)
 			if (doc->width > x_old) {
 				for(x=x_old; x < doc->width; x++) {
 					fprintf(stdout, " ......");
-				}	
+				}
 			}
 
 			y = y_now;
@@ -322,11 +331,13 @@ dump_document_cells(ascigram_document *doc)
 			fprintf(stdout, ": ");
 
 			while (cell_p = cells_iter(doc, &x, &y)) {
+				uint8_t safe_ch = cell_p->ch;
+				if (safe_ch < 0x20 || safe_ch > 126) safe_ch = ' ';
 				if (y != y_now) break;
 				if (cell_p->attr.meta & M_OCCUPIED) {
 					fprintf(stdout, "\033[41m");
 				}
-				fprintf(stdout, "%c\033[0m", cell_p->ch);				
+				fprintf(stdout, "%c\033[0m", safe_ch);
 				x_old = x;
 			}
 
@@ -344,9 +355,10 @@ dump_document_patrefs(ascigram_document *doc)
 	int pat_i = 0;
 	fprintf(stdout, "\033[0;37m");
 	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-		fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);		
+		fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);
 		fprintf(stdout, "\t- name: %s\n", (*pat_ref)->factory->name);
 		fprintf(stdout, "\t- state: %d\n", (*pat_ref)->state);
+		fprintf(stdout, "\t- finish: %d\n", (*pat_ref)->finish);
 		if ((*pat_ref)->factory->dump) {
 			(*pat_ref)->factory->dump(*pat_ref);
 		}

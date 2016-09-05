@@ -19,6 +19,13 @@ static const char *data_stickman = " \n"
 	" -|-\n"
 	" / \\\n";
 
+static const char *data_dbcylinder = " \n"
+	" .---.\n"
+	" '---'\n"
+	" |   |\n"
+	" |   |\n"
+	" '---'\n"
+	"      \n";
 
 int
 test_document_cells_iter(void)
@@ -39,13 +46,13 @@ test_document_cells_iter(void)
 		EXPECT(expect_y == cell_p->attr.y, "y: %d", expect_y);
 
 		expect_x++;
-		if (expect_x >= 4) {
+		if (expect_x >= doc->width) {
 			expect_x = 0;
 			expect_y++;
 		}
 	}
 
-	EXPECT(0 == expect_x && 4 == expect_y, "unsatisfy end, %d %d", expect_x, expect_y);
+	EXPECT(0 == expect_x && doc->height == expect_y, "unsatisfy end, %d %d", expect_x, expect_y);
 
 	ascigram_document_free(doc);
 
@@ -75,4 +82,25 @@ test_document_stickman(void)
 	return results;
 }
 
+int
+test_document_dbcylinder(void)
+{
+	int results = 0;
+	ascigram_cell *cell_p;
+	int x, y;
+	int expect_x,expect_y;
+	
+	ascigram_document *doc = ascigram_document_new(NULL);
 
+	ascigram_patterns_register_all();
+
+	scan_rows(doc, data_dbcylinder, strlen(data_dbcylinder));
+	parse_rows(doc);
+
+	dump_document_cells(doc);
+	dump_document_patrefs(doc);
+
+	ascigram_document_free(doc);
+
+	return results;
+}

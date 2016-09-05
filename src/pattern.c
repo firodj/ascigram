@@ -68,10 +68,14 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	if (pat->factory->match) {
 		meta = pat->factory->match(pat, cell_p);
 		if (meta < 0) {
-			pat->finish = meta;
-			meta = pat->finish == P_ACCEPT ? M_OCCUPIED : M_NONE;
+			/* if REJECTED but ACCEPTED then FINISH */
+			if (pat->finish == P_ACCEPT) {
+				pat->finish = P_FINISH;
+			} else {
+				pat->finish = meta;
+			}
+			meta = M_NONE;
 		} else if (meta > 0) {
-			/* if (meta & M_OCCUPIED) */
 		    pat->curr = cell_p->attr;
 		    pat->state++;
 		}
@@ -98,11 +102,8 @@ ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const cha
 }
 
 int
-ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x_ofs, int16_t y_ofs)
+ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y)
 {
-	uint16_t x = pat->curr.x + x_ofs;
-	uint16_t y = pat->curr.y + y_ofs;
-
 	if (x == cell_p->attr.x) {
         if (y == cell_p->attr.y) {
             return M_OCCUPIED;
