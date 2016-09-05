@@ -315,15 +315,18 @@ dump_document_cells(ascigram_document *doc)
 			x = 0;
 			y_now = y;
 			fprintf(stdout, "\n\033[33m%d\033[0m:", y);
-			while (cell_p = cells_iter(doc, &x, &y)) {
-				if (y != y_now) break;
-				fprintf(stdout, " %06x", cell_p->attr.meta);
 
-				x_old = x;
-			}
-			if (doc->width > x_old) {
-				for(x=x_old; x < doc->width; x++) {
-					fprintf(stdout, " ......");
+			if (doc->width <= 9) {
+				while (cell_p = cells_iter(doc, &x, &y)) {
+					if (y != y_now) break;
+					fprintf(stdout, " %06x", cell_p->attr.meta);
+
+					x_old = x;
+				}
+				if (doc->width > x_old) {
+					for(x=x_old; x < doc->width; x++) {
+						fprintf(stdout, " ......");
+					}
 				}
 			}
 
