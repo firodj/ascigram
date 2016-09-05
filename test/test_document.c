@@ -15,7 +15,7 @@ static const char *data_blank = "    \n"
 	"    \n";
 
 static const char *data_stickman = " \n"
-	"  o\n"
+	"  O\n"
 	" -|-\n"
 	" / \\\n";
 

@@ -1,36 +1,36 @@
 #include "../pattern.h"
 
-int dbcylinder_pattern_match(ascigram_pattern_p, ascigram_cell*);
-void dbcylinder_pattern_dump(ascigram_pattern_p pat);
+int documentbox_pattern_match(ascigram_pattern_p, ascigram_cell*);
+void documentbox_pattern_dump(ascigram_pattern_p pat);
 
-typedef struct dbcylinder_opaque {
+typedef struct documentbox_opaque {
 	uint16_t t;
 	uint16_t l;
 	uint16_t w;
 	uint16_t h;
-} dbcylinder_opaque;
+} documentbox_opaque;
 
 static
-ascigram_factory dbcylinder_pattern_factory = {
-	"dbcylinder",
-	dbcylinder_pattern_match,
+ascigram_factory documentbox_pattern_factory = {
+	"documentbox",
+	documentbox_pattern_match,
 	NULL,
 	NULL,
-	dbcylinder_pattern_dump,
-	sizeof(dbcylinder_opaque)};
+	documentbox_pattern_dump,
+	sizeof(documentbox_opaque)};
 
-void dbcylinder_pattern_register()
+void documentbox_pattern_register()
 {
-	ascigram_patterns_register(&dbcylinder_pattern_factory);
+	ascigram_patterns_register(&documentbox_pattern_factory);
 }
 
 /* IMPLEMENTATIOPN */
 
 int
-dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
+documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
 	int meta;
-	dbcylinder_opaque *opaque = (dbcylinder_opaque*)pat->opaque;
+	documentbox_opaque *opaque = (documentbox_opaque*)pat->opaque;
 	switch(pat->state) {
 	case 0: do {
 		meta = ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
@@ -140,9 +140,9 @@ dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 }
 
 void
-dbcylinder_pattern_dump(ascigram_pattern_p pat)
+documentbox_pattern_dump(ascigram_pattern_p pat)
 {
-	dbcylinder_opaque *opaque = (dbcylinder_opaque*)pat->opaque;
+	documentbox_opaque *opaque = (documentbox_opaque*)pat->opaque;
 	fprintf(stdout, "\t- t: %d\n", opaque->t);
 	fprintf(stdout, "\t- l: %d\n", opaque->l);
 	fprintf(stdout, "\t- w: %d\n", opaque->w);

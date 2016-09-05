@@ -78,7 +78,7 @@ test_pattern_stickman(void)
 	pat = ascigram_pattern_new(fact);
 
 	ascigram_memset(&cell, 0, sizeof(ascigram_cell));
-	cell.ch = 'o';
+	cell.ch = 'O';
 	cell.attr.x = 1;
 	cell.attr.y = 0;
 

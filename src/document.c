@@ -336,6 +336,8 @@ dump_document_cells(ascigram_document *doc)
 				if (y != y_now) break;
 				if (cell_p->attr.meta & M_OCCUPIED) {
 					fprintf(stdout, "\033[41m");
+				} else if (cell_p->attr.meta & ~M_OCCUPIED) {
+					fprintf(stdout, "\033[42m");
 				}
 				fprintf(stdout, "%c\033[0m", safe_ch);
 				x_old = x;
@@ -358,7 +360,6 @@ dump_document_patrefs(ascigram_document *doc)
 		fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);
 		fprintf(stdout, "\t- name: %s\n", (*pat_ref)->factory->name);
 		fprintf(stdout, "\t- state: %d\n", (*pat_ref)->state);
-		fprintf(stdout, "\t- finish: %d\n", (*pat_ref)->finish);
 		if ((*pat_ref)->factory->dump) {
 			(*pat_ref)->factory->dump(*pat_ref);
 		}

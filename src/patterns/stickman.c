@@ -31,7 +31,7 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	stickman_opaque *opaque = (stickman_opaque*)pat->opaque;
 	switch(pat->state) {
 	case 0: do {
-		meta = ascigram_pattern_expect(pat, cell_p, "o", M_OCCUPIED);
+		meta = ascigram_pattern_expect(pat, cell_p, "O", M_OCCUPIED);
 		if (meta & M_OCCUPIED) {
 			opaque->x = cell_p->attr.x;
 			opaque->y = cell_p->attr.y;
