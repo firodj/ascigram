@@ -1,5 +1,5 @@
 CC = cl
-CFLAGS = /O2 /sdl /Isrc /Itest /Ibin -Isrc/patterns /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
+CFLAGS = /O2 /sdl /Isrc /Itest /Ibin -Isrc/patterns -Iutil /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
 
 ASCIGRAM_SRC = \
 	src\buffer.obj \
@@ -15,7 +15,8 @@ TEST_SRC = \
     test\test.obj \
     test\test_stack.obj \
 	test\test_document.obj \
-	test\test_pattern.obj
+	test\test_pattern.obj \
+    util\ansicolor-w32.obj
 
 all: ascigram.exe
 

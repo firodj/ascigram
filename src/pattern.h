@@ -39,15 +39,16 @@ extern "C" {
 struct ascigram_pattern;
 typedef struct ascigram_pattern * ascigram_pattern_p;
 
-typedef int (*ascigram_pattern_match_t)(ascigram_pattern_p, ascigram_cell*);
-typedef void (*ascigram_pattern_init_t)(ascigram_pattern_p);
-typedef void (*ascigram_pattern_uninit_t)(ascigram_pattern_p);
+typedef int (*ascigram_pattern_match_f)(ascigram_pattern_p, ascigram_cell*);
+typedef void (*ascigram_pattern_f)(ascigram_pattern_p);
 
 struct ascigram_factory {
 	const char *name;
-	ascigram_pattern_match_t match;
-	ascigram_pattern_init_t init;
-	ascigram_pattern_uninit_t uninit;
+	ascigram_pattern_match_f match;
+	ascigram_pattern_f init;
+	ascigram_pattern_f uninit;
+	ascigram_pattern_f dump;
+	size_t opaque_size;
 };
 typedef struct ascigram_factory ascigram_factory;
 
@@ -57,6 +58,7 @@ struct ascigram_pattern {
 	int finish;
 	ascigram_stack attrs;
 	ascigram_attr curr;
+	char opaque[1];
 };
 typedef struct ascigram_pattern ascigram_pattern;
 

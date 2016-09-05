@@ -166,7 +166,7 @@ reserve_patrefs(ascigram_document *doc)
 	ascigram_pattern **pat_ref;
 	int pat_i = 0;
 	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-		if (!(*pat_ref)->finish != P_ACCEPT) {
+		if ((*pat_ref)->finish != P_ACCEPT) {
 			ascigram_pattern_free(*pat_ref);
 			ascigram_stack_pick(&doc->pattern_refs, --pat_i);
 		}
@@ -197,6 +197,7 @@ test_cell(ascigram_document* doc, ascigram_pattern_p pat, ascigram_cell *cell_p)
 
     if (pat->finish) {
 		if (pat->finish == P_ACCEPT) {
+			add_meta(doc, pat, cell_p, meta);
 			apply_pat(doc, pat);
 			remove_pat(doc, pat, 1);
 		} else {

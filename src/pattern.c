@@ -32,11 +32,13 @@ ascigram_pattern_p
 ascigram_pattern_new(ascigram_factory *fact)
 {
 	ascigram_pattern_p pat = NULL;
+	size_t total_size;
 
 	assert(fact);
 
-	pat = (ascigram_pattern_p) ascigram_malloc(sizeof(ascigram_pattern));
-	ascigram_memset(pat, 0, sizeof(ascigram_pattern));
+	total_size = sizeof(ascigram_pattern) + fact->opaque_size - sizeof(pat->opaque[1]);
+	pat = (ascigram_pattern_p) ascigram_malloc(total_size);
+	ascigram_memset(pat, 0x00, total_size);
 	pat->factory = fact;
 	
 	ascigram_stack_init(&pat->attrs, sizeof(ascigram_attr));
