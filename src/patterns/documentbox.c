@@ -1,6 +1,6 @@
 #include "../pattern.h"
 
-int documentbox_pattern_match(ascigram_pattern_p, ascigram_cell*);
+uint32_t documentbox_pattern_match(ascigram_pattern_p, ascigram_cell*);
 void documentbox_pattern_dump(ascigram_pattern_p pat);
 
 typedef struct documentbox_opaque {
@@ -25,9 +25,9 @@ void documentbox_pattern_register()
 	ascigram_patterns_register(&documentbox_pattern_factory);
 }
 
-/* IMPLEMENTATIOPN */
+/* IMPLEMENTATION */
 
-int
+uint32_t
 documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
 	int meta;
@@ -161,6 +161,7 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		if (meta & M_OCCUPIED) pat->state++; else return meta;
 	case 25:
 		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, opaque->t + opaque->h);
+		if (meta & E_FAIL) return meta;
 		if (meta & M_OCCUPIED) return M_BOX_AFTER_S | P_FINISH;
 		pat->state--;
 		return M_BOX_AFTER_S;
