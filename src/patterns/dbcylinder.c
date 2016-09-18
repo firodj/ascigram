@@ -1,7 +1,9 @@
 #include "../pattern.h"
 
+#ifdef _WITH_DBCYLINDER
+
 int dbcylinder_pattern_match(ascigram_pattern_p, ascigram_cell*);
-void dbcylinder_pattern_dump(ascigram_pattern_p pat);
+void dbcylinder_pattern_export(ascigram_pattern_p, ascigram_buffer*);
 
 typedef struct dbcylinder_opaque {
 	uint16_t t;
@@ -14,115 +16,120 @@ static
 ascigram_factory dbcylinder_pattern_factory = {
 	"dbcylinder",
 	dbcylinder_pattern_match,
-	NULL,
-	NULL,
-	dbcylinder_pattern_dump,
+	dbcylinder_pattern_export,
 	sizeof(dbcylinder_opaque)};
-
-void dbcylinder_pattern_register()
-{
-	ascigram_patterns_register(&dbcylinder_pattern_factory);
-}
 
 /* IMPLEMENTATIOPN */
 
 int
 dbcylinder_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
-	int meta;
-	dbcylinder_opaque *opaque = (dbcylinder_opaque*)pat->opaque;
-	switch(pat->state) {
+	ccrBegin(dbcylinder);
+
 	/* Top */
-	case 0: do {
-		opaque->t = cell_p->attr.y;
-		opaque->l = cell_p->attr.x;
+	opq->t = cell_p->attr.y;
+	opq->l = cell_p->attr.x;
 
-		return ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E);
-	case 1:
-		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
-	case 2:
-		meta = ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S);
-		if (meta & M_OCCUPIED) {pat->state--; return meta;}
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S|M_BOX_START_E));
 
-		opaque->w = cell_p->attr.x - opaque->l + 1;
+	do {
+		ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED|M_BOX_START_S));
+	} while (cell_p->ch != '.');
 
-		return ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S);
-	case 3:
-		return M_BOX_AFTER_E;
-	case 4:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + 1);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 5:
-		return ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-	case 6:
-		if (cell_p->attr.y != opaque->t + 1) return P_REJECT;
-		if ((cell_p->attr.x - opaque->l) < (opaque->w - 2)) pat->state--;
+	opq->w = cell_p->attr.x - opq->l + 1;
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, ".", M_OCCUPIED|M_BOX_START_S));
 
-		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-	case 7:
-		opaque->h = cell_p->attr.y - opaque->t + 1;
-
-		return ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-	case 8:
-		return M_BOX_AFTER_E;
-
-	/* Body */
-	case 9:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 10:
-		meta = ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E);
-		if (meta & M_OCCUPIED) return meta;
-
-		if (opaque->h < 3) return P_REJECT;
-	   
-		pat->state = 14 -1; /* To: Bottom */
-		return ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E);
-	case 11:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, pat->curr.y);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 12:
-		opaque->h++;
-		return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
-	case 13:
-		pat->state = 9 -1; /* To: Body */
-		return M_BOX_AFTER_E;
-
-	/* Bottom */
-	case 14: 
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 2, opaque->t + opaque->h);
-		if (meta & E_FAIL) return meta;
-		if (!(meta & M_OCCUPIED)) pat->state--;
-		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-	case 15:
-		opaque->h++;
-		return ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|P_ACCEPT);
-	case 16:
-		return M_BOX_AFTER_E;
+	ccrReturn(M_BOX_AFTER_E);
 	
-	/* Extras */
-	case 17:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l, opaque->t + opaque->h);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 18:
-		meta = ascigram_pattern_await(pat, cell_p, opaque->l + opaque->w - 1, opaque->t + opaque->h);
-		if (meta & E_FAIL) return meta;
-		if (meta & M_OCCUPIED) return M_BOX_AFTER_S | P_FINISH;
-		pat->state--;
-		return M_BOX_AFTER_S;
+	while (ascigram_pattern_await(pat, cell_p, opq->l, opq->t + 1, &meta)) {
+		ccrReturn(meta);
+	}
+	
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|
+		M_BOX_START_E));
 
-		} while(0);
+	while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta)) {
+		if (!meta) ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
+		else ccrReturn(meta);
 	}
 
-	return P_REJECT;
+	opq->h = cell_p->attr.y - opq->t + 1;
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E));
+
+	ccrReturn(M_BOX_AFTER_E);
+
+	/* Body */
+	
+	do {
+		while (ascigram_pattern_await(pat, cell_p, opq->l, opq->t + opq->h, &meta)) {
+			ccrReturn(meta);
+		}
+
+		if (cell_p->ch == '\'') break;
+
+		ccrReturn(ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED|M_BOX_START_E));
+		
+		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta)) {
+			ccrReturn(meta);
+		}
+
+		opq->h++;
+		ccrReturn(ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED));
+
+		ccrReturn(M_BOX_AFTER_E);
+	} while (1);
+
+	/* Bottom */
+
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E));
+
+	while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta))
+	{
+		if (!meta) ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
+		else ccrReturn(meta);
+	}
+
+	opq->h++;
+	ccrReturn( ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|P_ACCEPT) );
+
+	ccrReturn(M_BOX_AFTER_E);
+	
+	/* Extras */
+	while(ascigram_pattern_await(pat, cell_p, opq->l, opq->t + opq->h, &meta))
+	{
+		ccrReturn(meta);
+	}
+
+	while(ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, opq->t + opq->h, &meta))
+	{
+		if (!meta) ccrReturn(M_BOX_AFTER_S);
+		else ccrReturn(meta);
+	}
+	
+	ccrReturn(M_BOX_AFTER_S | P_FINISH);
+
+	ccrEnd();
 }
 
 void
-dbcylinder_pattern_dump(ascigram_pattern_p pat)
+dbcylinder_pattern_export(ascigram_pattern_p pat, ascigram_buffer *ob)
 {
-	dbcylinder_opaque *opaque = (dbcylinder_opaque*)pat->opaque;
-	fprintf(stdout, "\t- t: %d\n", opaque->t);
-	fprintf(stdout, "\t- l: %d\n", opaque->l);
-	fprintf(stdout, "\t- w: %d\n", opaque->w);
-	fprintf(stdout, "\t- h: %d\n", opaque->h);
+	dbcylinder_opaque *opq = (dbcylinder_opaque*)pat->opaque;
+	ascigram_buffer_printf(ob, ",\"t\":%d", opq->t);
+	ascigram_buffer_printf(ob, ",\"l\":%d", opq->l);
+	ascigram_buffer_printf(ob, ",\"w\":%d", opq->w);
+	ascigram_buffer_printf(ob, ",\"h\":%d", opq->h);
 }
+
+void dbcylinder_pattern_register()
+{
+	ascigram_patterns_register(&dbcylinder_pattern_factory);
+}
+
+#else
+
+void dbcylinder_pattern_register()
+{
+}
+
+#endif

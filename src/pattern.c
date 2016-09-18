@@ -43,18 +43,12 @@ ascigram_pattern_new(ascigram_factory *fact)
 	
 	ascigram_stack_init(&pat->attrs, sizeof(ascigram_attr));
 
-	if (pat->factory->init)
-		pat->factory->init(pat);
-	
 	return pat;
 }
 
 void
 ascigram_pattern_free(ascigram_pattern_p pat)
 {
-	if (pat->factory->uninit)
-		pat->factory->uninit(pat);
-
 	ascigram_stack_uninit(&pat->attrs);
 
 	free(pat);
@@ -89,8 +83,8 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 	return M_NONE;
 }
 
-int
-ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta)
+uint32_t
+ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, uint32_t default_meta)
 {
 	uint8_t* x = (uint8_t*)expect;
 	
@@ -106,7 +100,7 @@ ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const cha
 }
 
 int
-ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, int *meta)
+ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, uint32_t *meta)
 {
 	if (x == cell_p->attr.x) {
         if (y == cell_p->attr.y) {
@@ -118,7 +112,7 @@ ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x,
             return 1;
         }
 	} else if (y < cell_p->attr.y) {
-		meta = P_OUTPOS;
+		*meta = P_OUTPOS;
 		return 1;
     }
 

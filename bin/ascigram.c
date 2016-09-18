@@ -207,7 +207,8 @@ main(int argc, char** argv)
 
 	if (data.dump) {
 		dump_document_cells(document);
-		dump_document_patrefs(document);
+		export_document_patrefs(document, ob);
+		fputs(ascigram_buffer_cstr(ob), stdout);
 	}
 
 	/* Cleanup */

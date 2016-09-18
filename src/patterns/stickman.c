@@ -1,7 +1,7 @@
 #include "../pattern.h"
 
 int stickman_pattern_match(ascigram_pattern_p, ascigram_cell*);
-void stickman_pattern_dump(ascigram_pattern_p pat);
+void stickman_pattern_export(ascigram_pattern_p, ascigram_buffer*);
 
 typedef struct stickman_opaque {
 	uint16_t x;
@@ -12,9 +12,7 @@ static
 ascigram_factory stickman_pattern_factory = {
 	"stickman",
 	stickman_pattern_match,
-	NULL,
-	NULL,
-	stickman_pattern_dump,
+	stickman_pattern_export,
 	sizeof(stickman_opaque)};
 
 void stickman_pattern_register()
@@ -54,10 +52,10 @@ stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 }
 
 void
-stickman_pattern_dump(ascigram_pattern_p pat)
+stickman_pattern_export(ascigram_pattern_p pat, ascigram_buffer *ob)
 {
-	stickman_opaque *opaque = (stickman_opaque*)pat->opaque;
-	fprintf(stdout, "\t- x: %d\n", opaque->x);
-	fprintf(stdout, "\t- y: %d\n", opaque->y);
+	stickman_opaque *opq = (stickman_opaque*)pat->opaque;
+	ascigram_buffer_printf(ob, ",\"x\":%d", opq->x);
+	ascigram_buffer_printf(ob, ",\"y\":%d", opq->y);
 }
 

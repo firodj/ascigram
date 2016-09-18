@@ -20,7 +20,7 @@ extern "C" {
 
 struct ascigram_attr {
 	uint16_t x, y;
-    int32_t meta;
+    uint32_t meta;
 };
 typedef struct ascigram_attr ascigram_attr;
 
@@ -79,8 +79,9 @@ void ascigram_document_render(ascigram_document *doc, ascigram_buffer *ob, const
 /* ascigram_document_free: deallocate a document processor instance */
 void ascigram_document_free(ascigram_document *doc);
 
+void export_document_patrefs(ascigram_document *doc, ascigram_buffer *ob);
+
 void dump_document_cells(ascigram_document *doc);
-void dump_document_patrefs(ascigram_document *doc);
 
 #ifdef __cplusplus
 }

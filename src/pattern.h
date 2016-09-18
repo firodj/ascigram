@@ -27,18 +27,20 @@
 #define M_DASH_START_SW 0x040000
 #define M_LINE_AFTER_SW 0x080000
 #define M_DASH_AFTER_SW 0x100000
-#define P_ACCEPT 0x80000000
-#define P_FINISH 0xC0000000
-#define P_REJECT 0xE0000000
-#define P_OUTPOS 0xD0000000
-
-#define E_STOP   0x40000000
-#define E_FAIL   0x30000000
-#define E_RESULT 0xF0000000
 #define E_MASK   0x0FFFFFFF
 
+#define P_ACCEPT 0x80000000		/* 1000 */
+#define P_FINISH 0xC0000000     /* 1100 */
+#define P_REJECT 0xE0000000     /* 1110 */
+#define P_OUTPOS 0xD0000000     /* 1101 */
+
+#define E_STOP   0x40000000     /* 0100 */
+#define E_FAIL   0x30000000     /* 0011 */
+#define E_RESULT 0xF0000000     /* 1111 */
+
+/* original `ccr` is copyright 1995,2000 Simon Tatham. */
 #define ccrBegin(n)   \
-        int meta; \
+        uint32_t meta; \
 	    n ## _opaque *opq = (n ## _opaque*)pat->opaque; \
         switch(pat->state) { case 0:;
 
@@ -60,14 +62,13 @@ struct ascigram_pattern;
 typedef struct ascigram_pattern * ascigram_pattern_p;
 
 typedef uint32_t (*ascigram_pattern_match_f)(ascigram_pattern_p, ascigram_cell*);
+typedef void (*ascigram_pattern_export_f)(ascigram_pattern_p, ascigram_buffer*);
 typedef void (*ascigram_pattern_f)(ascigram_pattern_p);
 
 struct ascigram_factory {
 	const char *name;
 	ascigram_pattern_match_f match;
-	ascigram_pattern_f init;
-	ascigram_pattern_f uninit;
-	ascigram_pattern_f dump;
+	ascigram_pattern_export_f export;
 	size_t opaque_size;
 };
 typedef struct ascigram_factory ascigram_factory;
@@ -90,8 +91,8 @@ ascigram_factory* ascigram_patterns_iter(int *index);
 ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
 uint32_t ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
-int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta);
-int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, int *meta);
+uint32_t ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, uint32_t default_meta);
+int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, uint32_t *meta);
 
 #ifdef __cplusplus
 }

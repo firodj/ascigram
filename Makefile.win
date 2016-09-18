@@ -1,5 +1,6 @@
 CC = cl
 CFLAGS = /O2 /sdl /Isrc /Itest /Ibin -Isrc/patterns -Iutil /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
+WITHFLAGS = /D_WITH_STICKMAN /D_WITH_DBCYLINDER /D_WITH_DOCUMENTBOX
 
 ASCIGRAM_SRC = \
 	src\buffer.obj \
@@ -43,7 +44,7 @@ clean:
 # Generic object compilations
 
 .c.obj:
-	$(CC) $(CFLAGS) /c $< /Fo$@
+	$(CC) $(CFLAGS) $(WITHFLAGS) /c $< /Fo$@
 
 
 # Testing

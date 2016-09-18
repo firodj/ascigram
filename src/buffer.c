@@ -80,6 +80,8 @@ ascigram_memset(void *dest, unsigned char ch, size_t size)
 	if (!ret) {
 		fprintf(stderr, "Memset failed.\n");
 	}
+
+	return ret;
 }
 
 void

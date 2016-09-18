@@ -140,7 +140,7 @@ remove_pat(ascigram_document *doc, ascigram_pattern_p pat, int cooc)
 }
 
 void
-add_meta(ascigram_document *doc, ascigram_pattern_p pat, ascigram_cell *cell_p, int32_t meta)
+add_meta(ascigram_document *doc, ascigram_pattern_p pat, ascigram_cell *cell_p, uint32_t meta)
 {
 	ascigram_attr *attr_p;
 	if (meta & M_OCCUPIED) {
@@ -307,48 +307,70 @@ dump_document_cells(ascigram_document *doc)
 {
 	int x, y, y_now, x_old;
 	ascigram_cell *cell_p;
-	x = 0; y = 0;
+
 	fprintf(stdout, "\033[0;37m");
 	fprintf(stdout, "\nwidth: %d, height: %d", doc->width, doc->height);
+
+	x = 0; y = 0;
 	while (cell_p = cells_iter(doc, &x, &y)) {
 		if (x==1) {
 			x = 0;
 			y_now = y;
-			fprintf(stdout, "\n\033[33m%d\033[0m:", y);
+			fprintf(stdout, "\n\033[33m%2d\033[0m:", y);
 
-			if (doc->width <= 9) {
-				while (cell_p = cells_iter(doc, &x, &y)) {
-					if (y != y_now) break;
-					fprintf(stdout, " %06x", cell_p->attr.meta);
+			while (cell_p = cells_iter(doc, &x, &y)) {
+				uint8_t cfg = 39;
+				uint8_t cbg = 49;
 
-					x_old = x;
+				if (y != y_now) break;
+
+				if (cell_p->attr.meta & M_OCCUPIED) {
+					cbg = 42;
+				} else if (cell_p->attr.meta & ~M_OCCUPIED) {
+					cbg = 41;
 				}
-				if (doc->width > x_old) {
-					for(x=x_old; x < doc->width; x++) {
-						fprintf(stdout, " ......");
-					}
+
+				fprintf(stdout, " \033[37;%dm", cbg);
+				fprintf(stdout, "% 6X", cell_p->attr.meta);
+				fprintf(stdout, "\033[0m");
+
+				x_old = x;
+			}
+			/*
+			if (doc->width > x_old) {
+				for(x=x_old; x < doc->width; x++) {
+					fprintf(stdout, " \033[36;49m");
+					fprintf(stdout, "......");
+					fprintf(stdout, "\033[0m");
 				}
 			}
+			*/
 
 			y = y_now;
+            x = x_old;
+		}
+	}
+	x = 0; y = 0;
+	while (cell_p = cells_iter(doc, &x, &y)) {
+		if (x==1) {
 			x = 0;
-
-			fprintf(stdout, ": ");
+			y_now = y;
+			fprintf(stdout, "\n\033[33m%2d\033[0m ", y);
 
 			while (cell_p = cells_iter(doc, &x, &y)) {
 				uint8_t safe_ch = cell_p->ch;
 				if (safe_ch < 0x20 || safe_ch > 126) safe_ch = ' ';
 				if (y != y_now) break;
 				if (cell_p->attr.meta & M_OCCUPIED) {
-					fprintf(stdout, "\033[41m");
-				} else if (cell_p->attr.meta & ~M_OCCUPIED) {
 					fprintf(stdout, "\033[42m");
+				} else if (cell_p->attr.meta & ~M_OCCUPIED) {
+					fprintf(stdout, "\033[41m");
 				}
 				fprintf(stdout, "%c\033[0m", safe_ch);
 				x_old = x;
 			}
 
-            y = y_now;
+			y = y_now;
             x = x_old;
 		}
 	}
@@ -356,18 +378,18 @@ dump_document_cells(ascigram_document *doc)
 }
 
 void
-dump_document_patrefs(ascigram_document *doc)
+export_document_patrefs(ascigram_document *doc, ascigram_buffer *ob)
 {
 	ascigram_pattern_p *pat_ref;
 	int pat_i = 0;
-	fprintf(stdout, "\033[0;37m");
+	// fprintf(stdout, "\033[0;37m");
 	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-		fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);
-		fprintf(stdout, "\t- name: %s\n", (*pat_ref)->factory->name);
-		fprintf(stdout, "\t- state: %d\n", (*pat_ref)->state);
-		if ((*pat_ref)->factory->dump) {
-			(*pat_ref)->factory->dump(*pat_ref);
+		// fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);
+		ascigram_buffer_printf(ob, "{\"name\":\"%s\"", (*pat_ref)->factory->name);
+		if ((*pat_ref)->factory->export) {
+			(*pat_ref)->factory->export(*pat_ref, ob);
 		}
+		ascigram_buffer_puts(ob, "}\n");
 	}
 	fprintf(stdout, "\n");
 }
