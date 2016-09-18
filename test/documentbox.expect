@@ -1,6 +1,6 @@
-{"name":"documentbox","t":0,"l":0,"w":9,"h":5}
-{"name":"documentbox","t":0,"l":12,"w":8,"h":5}
-{"name":"documentbox","t":7,"l":0,"w":13,"h":3}
-{"name":"documentbox","t":7,"l":16,"w":15,"h":3}
-{"name":"documentbox","t":12,"l":0,"w":7,"h":3}
-{"name":"documentbox","t":12,"l":10,"w":5,"h":4}
+{"name":"documentbox","t":0,"l":0,"w":9,"h":5,"fold":0}
+{"name":"documentbox","t":0,"l":12,"w":8,"h":5,"fold":1}
+{"name":"documentbox","t":7,"l":0,"w":13,"h":3,"fold":0}
+{"name":"documentbox","t":7,"l":16,"w":15,"h":3,"fold":0}
+{"name":"documentbox","t":12,"l":0,"w":7,"h":3,"fold":0}
+{"name":"documentbox","t":12,"l":10,"w":5,"h":4,"fold":1}

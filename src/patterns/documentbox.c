@@ -172,6 +172,7 @@ documentbox_pattern_export(ascigram_pattern_p pat, ascigram_buffer *ob)
 	ascigram_buffer_printf(ob, ",\"l\":%d", opq->l);
 	ascigram_buffer_printf(ob, ",\"w\":%d", opq->w);
 	ascigram_buffer_printf(ob, ",\"h\":%d", opq->h);
+	ascigram_buffer_printf(ob, ",\"fold\":%d", opq->fold);
 }
 
 void documentbox_pattern_register()
