@@ -81,7 +81,6 @@ ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		} 
 		if (meta & E_MASK) {
 		    pat->curr = cell_p->attr;
-		    pat->state++;
 		}
 		return (meta & E_MASK);
 	}
@@ -107,15 +106,23 @@ ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const cha
 }
 
 int
-ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y)
+ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, int *meta)
 {
 	if (x == cell_p->attr.x) {
         if (y == cell_p->attr.y) {
-            return M_OCCUPIED;
+            *meta = M_OCCUPIED;
+            return 0;
         }
-        else if (x < cell_p->attr.x) return P_OUTPOS;
-	} else if (y < cell_p->attr.y) return P_OUTPOS;
-     
-   return M_NONE;
+        else if (x < cell_p->attr.x) {
+            *meta = P_OUTPOS;
+            return 1;
+        }
+	} else if (y < cell_p->attr.y) {
+		meta = P_OUTPOS;
+		return 1;
+    }
+
+    *meta = M_NONE;
+    return 1;
 }
 

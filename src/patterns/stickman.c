@@ -27,36 +27,30 @@ void stickman_pattern_register()
 int
 stickman_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 {
-	int meta;
-	stickman_opaque *opaque = (stickman_opaque*)pat->opaque;
-	switch(pat->state) {
-	case 0: do {
-		opaque->x = cell_p->attr.x;
-		opaque->y = cell_p->attr.y;
+	ccrBegin(stickman);
 
-		return ascigram_pattern_expect(pat, cell_p, "O", M_OCCUPIED);
-	case 1:
-		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-1, pat->curr.y+1);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 2:
-		return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-    case 3:
-        return ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED);
-    case 4:
-        return ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED);
-	case 5:
-		meta = ascigram_pattern_await(pat, cell_p, pat->curr.x-2, pat->curr.y+1);
-		if (meta & M_OCCUPIED) pat->state++; else return meta;
-	case 6:
-		return ascigram_pattern_expect(pat, cell_p, "/", M_OCCUPIED);
-	case 7:
-        return ascigram_pattern_expect(pat, cell_p, " ", M_OCCUPIED);
-	case 8:
-        return ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED|P_FINISH);
-	    } while(0);
-	}
+	opq->x = cell_p->attr.x;
+	opq->y = cell_p->attr.y;
+
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "O", M_OCCUPIED));
 	
-	return P_REJECT;
+    while (ascigram_pattern_await(pat, cell_p, pat->curr.x-1, pat->curr.y+1, &meta)) {
+      ccrReturn(meta);
+    }
+    
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
+    ccrReturn(ascigram_pattern_expect(pat, cell_p, "|", M_OCCUPIED));
+    ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
+	
+	while (ascigram_pattern_await(pat, cell_p, pat->curr.x-2, pat->curr.y+1, &meta)) {
+        ccrReturn(meta);
+    }
+    
+	ccrReturn(ascigram_pattern_expect(pat, cell_p, "/", M_OCCUPIED));
+    ccrReturn(ascigram_pattern_expect(pat, cell_p, " ", M_OCCUPIED));
+    ccrReturn(ascigram_pattern_expect(pat, cell_p, "\\", M_OCCUPIED|P_FINISH));
+    
+    ccrEnd();
 }
 
 void

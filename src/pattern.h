@@ -37,6 +37,21 @@
 #define E_RESULT 0xF0000000
 #define E_MASK   0x0FFFFFFF
 
+#define ccrBegin(n)   \
+        int meta; \
+	    n ## _opaque *opq = (n ## _opaque*)pat->opaque; \
+        switch(pat->state) { case 0:;
+
+#define ccrEnd()     \
+        } \
+        return P_REJECT; 
+
+#define ccrReturn(z)     \
+        do {\
+            pat->state=__LINE__;\
+            return (z); case __LINE__:;\
+        } while (0)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -76,7 +91,7 @@ ascigram_pattern_p ascigram_pattern_new(ascigram_factory* fact);
 void ascigram_pattern_free(ascigram_pattern_p pat);
 uint32_t ascigram_pattern_test(ascigram_pattern_p pat, ascigram_cell* cell_p);
 int ascigram_pattern_expect(ascigram_pattern_p pat, ascigram_cell* cell_p, const char *expect, int32_t default_meta);
-int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y);
+int ascigram_pattern_await(ascigram_pattern_p pat, ascigram_cell* cell_p, int16_t x, int16_t y, int *meta);
 
 #ifdef __cplusplus
 }
