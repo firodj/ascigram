@@ -382,9 +382,7 @@ export_document_patrefs(ascigram_document *doc, ascigram_buffer *ob)
 {
 	ascigram_pattern_p *pat_ref;
 	int pat_i = 0;
-	// fprintf(stdout, "\033[0;37m");
 	while (pat_ref = ascigram_stack_iter(&doc->pattern_refs, &pat_i)) {
-		// fprintf(stdout, "\n\033[32m%d\033[0m:", pat_i-1);
 		ascigram_buffer_printf(ob, "{\"name\":\"%s\"", (*pat_ref)->factory->name);
 		if ((*pat_ref)->factory->export) {
 			(*pat_ref)->factory->export(*pat_ref, ob);

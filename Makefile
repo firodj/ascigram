@@ -1,9 +1,12 @@
 CC = gcc
 CFLAGS = -g -O3 -ansi -pedantic -Wall -Wextra -Wno-unused-parameter
+WITHFLAGS = -D_WITH_STICKMAN -D_WITH_DBCYLINDER -D_WITH_DOCUMENTBOX
+DEL = del
 
-ASCIGRAM_CFLAGS = $(CFLAGS) -Isrc -Itest -Ibin -Isrc/patterns -Iutil
+ASCIGRAM_CFLAGS = $(CFLAGS) -Isrc -Itest -Ibin -Isrc -Iutil
 ifneq ($(OS),Windows_NT)
 	ASCIGRAM_CFLAGS += -fPIC
+	DEL = rm
 endif
 
 ASCIGRAM_SRC = \
@@ -13,7 +16,7 @@ ASCIGRAM_SRC = \
 	src/svg.o \
 	src/version.o \
 	src/pattern.o \
-	util/ansicolor-w32.o
+	util/ansicolor-w32.o \
 	src/patterns/patterns.o \
 	src/patterns/stickman.o \
 	src/patterns/dbcylinder.o \
@@ -42,21 +45,21 @@ testing: $(TEST_SRC) $(ASCIGRAM_SRC)
 # Housekeeping
 
 clean:
-	rm $(ASCIGRAM_SRC)
-	rm $(TEST_SRC)
-	rm $(EXE_SRC)
-	rm ascigram
+	$(DEL) $(ASCIGRAM_SRC)
+	$(DEL) $(TEST_SRC)
+	$(DEL) $(EXE_SRC)
+	$(DEL) ascigram
 
 # Generic object compilations
 
 %.o: %.c
-	$(CC) $(ASCIGRAM_CFLAGS) -c -o $@ $<
+	$(CC) $(ASCIGRAM_CFLAGS) $(WITH_FLAGS) -c -o $@ $<
 
 
 # Testing
 
 test: testing
-	testing
+	./testing
 
 pattern: ascigram
 	python test\runner.py

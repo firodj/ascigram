@@ -6,6 +6,10 @@
 #include <string.h>
 #include "ansicolor-w32.h"
 
+#ifndef _MSC_VER
+#include <errno.h>
+#endif
+
 void scan_rows(ascigram_document *doc, const uint8_t *data, size_t size);
 void parse_rows(ascigram_document *doc);
 ascigram_cell* cells_iter(ascigram_document* doc, int* x, int* y);
@@ -79,7 +83,7 @@ match_document(const char *name) {
 
 		res = print_diff(ob, xb);
 
-		if (xb) {			
+		if (xb) {
 			ascigram_buffer_free(xb);
 		}
 
@@ -120,22 +124,22 @@ print_diff(ascigram_buffer *ob, ascigram_buffer *xb)
 			else if (!i_stop && !j_stop) {
 				if (ob->data[i] != xb->data[j]) {
 					fputs("\033[31m", stdout);
-					fputc(ob->data[i], stdout); 
+					fputc(ob->data[i], stdout);
 					fputs("\033[0m", stdout);
 					fputs("\033[32m", stdout);
-					fputc(xb->data[j], stdout); 
+					fputc(xb->data[j], stdout);
 					fputs("\033[0m", stdout);
 
-					res = 1;					
+					res = 1;
 				} else {
-					fputc(ob->data[i], stdout); 
+					fputc(ob->data[i], stdout);
 				}
 			} else res = 1;
 
 			j++;
 		} else {
 			if (!i_stop)
-				fputc(ob->data[i], stdout); 
+				fputc(ob->data[i], stdout);
 		}
 	}
 
@@ -149,7 +153,7 @@ test_document_cells_iter(void)
 	ascigram_cell *cell_p;
 	int x, y;
 	int expect_x,expect_y;
-	
+
 	ascigram_document *doc = ascigram_document_new(NULL);
 
 	scan_rows(doc, data_blank, strlen(data_blank));
@@ -184,7 +188,7 @@ test_documents(void)
 	fprintf(stdout, "\n");
 	for(i =0; i < max; ++i) {
 		int result_case = 0;
-		
+
 		fprintf(stdout, "PATTERN: %s ...", documents[i]);
 		result_case = match_document(documents[i]);
 
