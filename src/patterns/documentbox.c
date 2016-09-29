@@ -10,7 +10,7 @@ typedef struct documentbox_opaque {
 	uint16_t l;
 	uint16_t w;
 	uint16_t h;
-	uint8_t fold, wave;
+	uint8_t fold:1;
 } documentbox_opaque;
 
 static
@@ -101,7 +101,6 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 
 	/* Bottom-Wave: */
 	if (cell_p->ch == '\'' && !opq->fold) {
-		opq->wave = 1;
 		ccrReturn(ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E));
 
 		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 2, pat->curr.y, &meta)) {
@@ -133,8 +132,6 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 
 	/* Bottom-Flat */   
 	else {
-		opq->wave = 0;
-
 		ccrReturn(ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_E));
 
 		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta)) {

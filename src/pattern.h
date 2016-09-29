@@ -40,7 +40,8 @@
 
 /* original `ccr` is copyright 1995,2000 Simon Tatham. */
 #define ccrBegin(n)   \
-        uint32_t meta; \
+        uint32_t meta=0; \
+		int skip=0; \
 	    n ## _opaque *opq = (n ## _opaque*)pat->opaque; \
         switch(pat->state) { case 0:;
 

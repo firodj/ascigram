@@ -25,7 +25,9 @@ static const char *data_blank = "a   \n"
 static const char* documents[] = {
 	"stickman",
 	"dbcylinder",
-	"documentbox"};
+	"documentbox",
+	"diamondbox"
+};
 
 ascigram_buffer *
 read_file(const char *filename) {
@@ -185,12 +187,19 @@ test_documents(void)
 	size_t max = sizeof(documents)/sizeof(documents[0]);
 	int results = 0;
 
+	const char *test_only = 0;	// eg. "diamondbox";
+
 	fprintf(stdout, "\n");
 	for(i =0; i < max; ++i) {
 		int result_case = 0;
+		const char *name = documents[i];
 
-		fprintf(stdout, "PATTERN: %s ...", documents[i]);
-		result_case = match_document(documents[i]);
+		fprintf(stdout, "PATTERN: %s ...", name);
+		if (test_only && (strcmp(name, test_only) != 0)) {
+			fputs("\033[33mPATTERN SKIP\033[0m\n", stdout);
+			continue;
+		}
+		result_case = match_document(name);
 
 		if (result_case == 0) {
 			fputs("\033[32mPATTERN PASS\033[0m\n", stdout);
