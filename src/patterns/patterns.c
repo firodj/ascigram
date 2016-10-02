@@ -3,6 +3,7 @@
 #include "dbcylinder.h"
 #include "documentbox.h"
 #include "diamondbox.h"
+#include "rectangularbox.h"
 
 void
 ascigram_patterns_register_all()
@@ -11,4 +12,5 @@ ascigram_patterns_register_all()
 	dbcylinder_pattern_register();
 	documentbox_pattern_register();
 	diamondbox_pattern_register();
+	rectangularbox_pattern_register();
 }

@@ -99,8 +99,22 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 		}
 	} while (cell_p->ch == '|');
 
+	/* Bottom-Flat */
+	if (opq->fold) {
+		ccrReturn(ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_E));
+
+		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta)) {
+			if (meta & E_FAIL) ccrReturn(meta);
+			else ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
+		}
+		
+		opq->h++;
+		ccrReturn(ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|P_ACCEPT));
+
+		ccrReturn(M_BOX_AFTER_E);
+	} else
 	/* Bottom-Wave: */
-	if (cell_p->ch == '\'' && !opq->fold) {
+	{
 		ccrReturn(ascigram_pattern_expect(pat, cell_p, "'", M_OCCUPIED|M_BOX_START_E));
 
 		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 2, pat->curr.y, &meta)) {
@@ -129,22 +143,6 @@ documentbox_pattern_match(ascigram_pattern_p pat, ascigram_cell* cell_p)
 
 		ccrReturn(M_BOX_AFTER_E);
 	}
-
-	/* Bottom-Flat */   
-	else {
-		ccrReturn(ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|M_BOX_START_E));
-
-		while (ascigram_pattern_await(pat, cell_p, opq->l + opq->w - 1, pat->curr.y, &meta)) {
-			if (meta & E_FAIL) ccrReturn(meta);
-			else ccrReturn(ascigram_pattern_expect(pat, cell_p, "-", M_OCCUPIED));
-		}
-		
-		opq->h++;
-		ccrReturn(ascigram_pattern_expect(pat, cell_p, "+", M_OCCUPIED|P_ACCEPT));
-
-		ccrReturn(M_BOX_AFTER_E);
-	}
-	
 	/* Extras */
 
 	while (ascigram_pattern_await(pat, cell_p, opq->l, opq->t + opq->h, &meta)) {

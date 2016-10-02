@@ -1,4 +1,4 @@
-/* dbcylinder.h */
+/* diamondbox.h */
 #ifndef _DIAMONDBOX_H_
 #define _DIAMONDBOX_H_
 

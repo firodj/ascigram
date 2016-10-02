@@ -1,6 +1,10 @@
 CC = cl
 CFLAGS = /O2 /sdl /Isrc /Itest /Ibin -Isrc/patterns -Iutil /D_CRT_SECURE_NO_WARNINGS /D "NDEBUG"
-WITHFLAGS = /D_WITH_STICKMAN /D_WITH_DBCYLINDER /D_WITH_DOCUMENTBOX /D_WITH_DIAMONDBOX
+WITHFLAGS = /D_WITH_STICKMAN \
+			/D_WITH_DBCYLINDER \
+			/D_WITH_DOCUMENTBOX \
+			/D_WITH_DIAMONDBOX \
+			/D_WITH_RECTANGULARBOX
 
 ASCIGRAM_SRC = \
 	src\buffer.obj \
@@ -14,7 +18,8 @@ ASCIGRAM_SRC = \
 	src\patterns\stickman.obj \
 	src\patterns\dbcylinder.obj \
 	src\patterns\documentbox.obj \
-	src\patterns\diamondbox.obj
+	src\patterns\diamondbox.obj \
+	src\patterns\rectangularbox.obj
 
 TEST_SRC = \
     test\test.obj \

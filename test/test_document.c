@@ -26,8 +26,11 @@ static const char* documents[] = {
 	"stickman",
 	"dbcylinder",
 	"documentbox",
-	"diamondbox"
+	"diamondbox",
+	"rectangularbox"
 };
+
+static const char *test_only = 0;	// eg. "rectangularbox"
 
 ascigram_buffer *
 read_file(const char *filename) {
@@ -186,8 +189,6 @@ test_documents(void)
 	size_t i = 0;
 	size_t max = sizeof(documents)/sizeof(documents[0]);
 	int results = 0;
-
-	const char *test_only = 0;	// eg. "diamondbox";
 
 	fprintf(stdout, "\n");
 	for(i =0; i < max; ++i) {

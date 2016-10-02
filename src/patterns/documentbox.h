@@ -1,4 +1,4 @@
-/* dbcylinder.h */
+/* documentbox.h */
 #ifndef _DOCUMENTBOX_H_
 #define _DOCUMENTBOX_H_
 
